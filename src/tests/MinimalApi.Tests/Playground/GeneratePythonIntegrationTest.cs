@@ -2,7 +2,6 @@
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using MinimalApi;
 
 namespace MinimalApi.Tests.Playground;
 

@@ -89,14 +89,12 @@ public static class AiServiceCollectionExtensions
 					var azureOpenAiEmbeddingConfig = new AzureOpenAIConfig();
 					var azureAiSearchConfig = new AzureAISearchConfig();
 					var azureBlobConfig = new AzureBlobsConfig();
-					var azDocIntelConfig = new AzureAIDocIntelConfig();
 					var searchClientConfig = new SearchClientConfig();
 
 					config.BindSection("KernelMemory:Services:AzureOpenAIText", azureOpenAiTextConfig);
 					config.BindSection("KernelMemory:Services:AzureOpenAIEmbedding", azureOpenAiEmbeddingConfig);
 					config.BindSection("KernelMemory:Services:AzureBlobs", azureBlobConfig);
 					config.BindSection("KernelMemory:Services:AzureAISearch", azureAiSearchConfig);
-					config.BindSection("KernelMemory:Services:AzureAIDocIntel", azDocIntelConfig);
 					config.BindSection("KernelMemory:Retrieval:SearchClient", searchClientConfig);
 
 					//Build Kernel memory instance
@@ -105,7 +103,6 @@ public static class AiServiceCollectionExtensions
 						.WithAzureOpenAITextEmbeddingGeneration(azureOpenAiEmbeddingConfig)
 						.WithAzureBlobsDocumentStorage(azureBlobConfig)
 						.WithAzureAISearchMemoryDb(azureAiSearchConfig)
-						.WithAzureAIDocIntel(azDocIntelConfig)
 						.WithSearchClientConfig(searchClientConfig)
 						.Build<MemoryServerless>();
 

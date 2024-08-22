@@ -37,7 +37,7 @@ public class MemorySearchService : IMemorySearchService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error occurred while searching in GunvorCopilot memory");
+            _logger.LogError(e, "An error occurred while searching in DocAssistant memory");
             debugContent =
             [
                 new SupportingContent
@@ -105,7 +105,7 @@ public class MemorySearchService : IMemorySearchService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error occurred while searching in GunvorCopilot memory");
+            _logger.LogError(e, "An error occurred while searching in DocAssistant memory");
             debugContent = [e.ToString()];
         }
 

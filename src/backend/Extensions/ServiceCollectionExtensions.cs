@@ -12,7 +12,7 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddAzureServices(this IServiceCollection services)
     {
-        services.AddSingleton<TokenCredential, DefaultAzureCredential>();
+        services.AddSingleton<TokenCredential, AzureCliCredential>();
 
 		services.AddSingleton(
 			sp =>
