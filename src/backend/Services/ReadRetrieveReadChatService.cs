@@ -101,7 +101,7 @@ standard plan AND dental AND employee benefit.
 
         // step 2
         // use query to search related docs
-        var documentContentList = await _searchClient.QueryDocumentsAsync(query, embeddings, overrides, cancellationToken);
+        var documentContentList = await _searchClient.QueryDocuments(query, embeddings, overrides, cancellationToken);
 
         string documentContents = string.Empty;
         if (documentContentList.Length == 0)
@@ -118,8 +118,8 @@ standard plan AND dental AND employee benefit.
         SupportingImageRecord[]? images = default;
         if (_visionService is not null)
         {
-            var queryEmbeddings = await _visionService.VectorizeTextAsync(query ?? question, cancellationToken);
-            images = await _searchClient.QueryImagesAsync(query, queryEmbeddings.vector, overrides, cancellationToken);
+            var queryEmbeddings = await _visionService.VectorizeText(query ?? question, cancellationToken);
+            images = await _searchClient.QueryImages(query, queryEmbeddings.Vector, overrides, cancellationToken);
         }
 
         // step 3

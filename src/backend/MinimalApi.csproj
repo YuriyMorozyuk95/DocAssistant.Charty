@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocAssistant.Charty.Ai\DocAssistant.Charty.Ai.csproj" />
     <ProjectReference Include="..\frontend\ClientApp.csproj" />
     <ProjectReference Include="..\shared\Shared\Shared.csproj" />
   </ItemGroup>

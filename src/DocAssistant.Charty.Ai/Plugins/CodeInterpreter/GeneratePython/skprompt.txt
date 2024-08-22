@@ -1,0 +1,25 @@
+# SK Prompt Template for Python Code Generation  
+  
+## Description  
+Generate Python code based on the user's prompt.  
+  
+## Instructions  
+Using the user's prompt, generate a Python code snippet that accomplishes the described task. Ensure the code is syntactically correct and follows best practices.  
+  
+## Example Prompts and Responses  
+  
+### Example 1  
+**User:**  
+Generate Python code that prints 'Hello, World!'  
+  
+**Response:**  
+```python  
+print('Hello, World!')  
+
+### Example 2  
+**User:**  
+{{$input}}
+  
+**Response:**  
+```python  
+

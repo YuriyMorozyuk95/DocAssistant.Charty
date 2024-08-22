@@ -4,7 +4,7 @@ namespace ClientApp.Services;
 
 public class WebPdfViewer(IDialogService dialog, ISnackbar snackbar) : IPdfViewer
 {
-    public ValueTask ShowDocumentAsync(string name, string url)
+    public ValueTask ShowDocument(string name, string url)
     {
         var extension = Path.GetExtension(name);
         if (extension is ".pdf")

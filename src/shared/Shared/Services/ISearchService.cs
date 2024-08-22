@@ -2,13 +2,13 @@
 
 public interface ISearchService
 {
-    Task<SupportingContentRecord[]> QueryDocumentsAsync(
+    Task<SupportingContentRecord[]> QueryDocuments(
                string? query = null,
                float[]? embedding = null,
                RequestOverrides? overrides = null,
                CancellationToken cancellationToken = default);
 
-    Task<SupportingImageRecord[]> QueryImagesAsync(
+    Task<SupportingImageRecord[]> QueryImages(
                string? query = null,
                float[]? embedding = null,
                RequestOverrides? overrides = null,

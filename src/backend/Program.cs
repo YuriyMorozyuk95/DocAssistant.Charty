@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using DocAssistant.Charty.Ai;
+
 using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +66,8 @@ else
         });
     }
 }
+
+builder.Services.AddAiServices();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

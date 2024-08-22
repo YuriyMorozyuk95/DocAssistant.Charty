@@ -33,7 +33,7 @@ public class AzureDocumentSearchServiceTest
         };
 
         var query = "What is included in my Northwind Health Plus plan that is not in standard?";
-        var records = await service.QueryDocumentsAsync(query, overrides: option);
+        var records = await service.QueryDocuments(query, overrides: option);
         records.Count().Should().Be(3);
     }
 
@@ -44,9 +44,9 @@ public class AzureDocumentSearchServiceTest
         var searchServceEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var openAiEmbeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
-        var openAIClient = new OpenAIClient(new Uri(openAiEndpoint), new DefaultAzureCredential());
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), new DefaultAzureCredential());
         var query = "What is included in my Northwind Health Plus plan that is not in standard?";
-        var embeddingResponse = await openAIClient.GetEmbeddingsAsync(new EmbeddingsOptions(openAiEmbeddingDeployment, [query]));
+        var embeddingResponse = await openAiClient.GetEmbeddingsAsync(new EmbeddingsOptions(openAiEmbeddingDeployment, [query]));
         var embedding = embeddingResponse.Value.Data.First().Embedding;
         var searchClient = new SearchClient(new Uri(searchServceEndpoint), index, new DefaultAzureCredential());
         var service = new AzureSearchService(searchClient);
@@ -60,7 +60,7 @@ public class AzureDocumentSearchServiceTest
             SemanticRanker = true,
         };
 
-        var records = await service.QueryDocumentsAsync(query: query, embedding: embedding.ToArray(), overrides: option);
+        var records = await service.QueryDocuments(query: query, embedding: embedding.ToArray(), overrides: option);
         records.Count().Should().Be(3);
     }
 
@@ -79,13 +79,13 @@ public class AzureDocumentSearchServiceTest
         var service = new AzureSearchService(searchClient);
 
         var query = "financial report";
-        var queryEmbedding = await computerVisionService.VectorizeTextAsync(query);
+        var queryEmbedding = await computerVisionService.VectorizeText(query);
         var option = new RequestOverrides
         {
             Top = 3,
         };
 
-        var records = await service.QueryImagesAsync(query: query, embedding: queryEmbedding.vector, overrides: option);
+        var records = await service.QueryImages(query: query, embedding: queryEmbedding.Vector, overrides: option);
         records.Count().Should().Be(3);
         records[0].Title.Should().Contain("Financial Market Analysis Report");
     }

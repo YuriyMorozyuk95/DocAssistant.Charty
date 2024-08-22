@@ -9,19 +9,19 @@ public sealed partial class MainLayout
     private bool _settingsOpen = false;
     private SettingsPanel? _settingsPanel;
 
-    private bool _isDarkTheme
+    private bool IsDarkTheme
     {
         get => LocalStorage.GetItem<bool>(StorageKeys.PrefersDarkTheme);
         set => LocalStorage.SetItem<bool>(StorageKeys.PrefersDarkTheme, value);
     }
 
-    private bool _isReversed
+    private bool IsReversed
     {
         get => LocalStorage.GetItem<bool?>(StorageKeys.PrefersReversedConversationSorting) ?? false;
         set => LocalStorage.SetItem<bool>(StorageKeys.PrefersReversedConversationSorting, value);
     }
 
-    private bool _isRightToLeft =>
+    private bool IsRightToLeft =>
         Thread.CurrentThread.CurrentUICulture is { TextInfo.IsRightToLeft: true };
 
     [Inject] public required NavigationManager Nav { get; set; }
@@ -42,7 +42,7 @@ public sealed partial class MainLayout
 
     private void OnMenuClicked() => _drawerOpen = !_drawerOpen;
 
-    private void OnThemeChanged() => _isDarkTheme = !_isDarkTheme;
+    private void OnThemeChanged() => IsDarkTheme = !IsDarkTheme;
 
-    private void OnIsReversedChanged() => _isReversed = !_isReversed;
+    private void OnIsReversedChanged() => IsReversed = !IsReversed;
 }

@@ -126,7 +126,7 @@ public class MemorySearchService : IMemorySearchService
   
         foreach (var document in searchResult.Results)  
         {  
-            var tableSchema = await _documentStorageService.GetDocumentContentAsync(document.DocumentId, document.SourceName, MemoryManagerService.DataWarehouseSchemaIndex);
+            var tableSchema = await _documentStorageService.GetDocumentContent(document.DocumentId, document.SourceName, MemoryManagerService.DataWarehouseSchemaIndex);
 
             yield return tableSchema;
         }  

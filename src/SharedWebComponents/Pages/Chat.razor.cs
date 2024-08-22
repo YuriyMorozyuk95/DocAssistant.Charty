@@ -49,7 +49,7 @@ public sealed partial class Chat
             history.Add(new ChatMessage("user", _userQuestion));
 
             var request = new ChatRequest([.. history], Settings.Overrides);
-            var result = await ApiClient.ChatConversationAsync(request);
+            var result = await ApiClient.ChatConversation(request);
 
             _questionAndAnswerMap[_currentQuestion] = result.Response;
             if (result.IsSuccessful)

@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Shared.Models;
 
 public sealed partial class AzureSearchEmbedService(
-    OpenAIClient openAIClient,
+    OpenAIClient openAiClient,
     string embeddingModelName,
     SearchClient searchClient,
     string searchIndexName,
@@ -30,11 +30,11 @@ public sealed partial class AzureSearchEmbedService(
     [GeneratedRegex("[^0-9a-zA-Z_-]")]
     private static partial Regex MatchInSetRegex();
 
-    public async Task<bool> EmbedPDFBlobAsync(Stream pdfBlobStream, string blobName)
+    public async Task<bool> EmbedPdfBlob(Stream pdfBlobStream, string blobName)
     {
         try
         {
-            await EnsureSearchIndexAsync(searchIndexName);
+            await EnsureSearchIndex(searchIndexName);
             Console.WriteLine($"Embedding blob '{blobName}'");
             var pageMap = await GetDocumentTextAsync(pdfBlobStream, blobName);
 
@@ -73,7 +73,7 @@ public sealed partial class AzureSearchEmbedService(
         }
     }
 
-    public async Task<bool> EmbedImageBlobAsync(
+    public async Task<bool> EmbedImageBlob(
         Stream imageStream,
         string imageUrl,
         string imageName,
@@ -85,7 +85,7 @@ public sealed partial class AzureSearchEmbedService(
                 "Computer Vision service is required to include image embeddings field, please enable GPT_4V support");
         }
 
-        var embeddings = await computerVisionService.VectorizeImageAsync(imageUrl, ct);
+        var embeddings = await computerVisionService.VectorizeImage(imageUrl, ct);
 
         // id can only contain letters, digits, underscore (_), dash (-), or equal sign (=).
         var imageId = MatchInSetRegex().Replace(imageUrl, "_").TrimStart('_');
@@ -98,7 +98,7 @@ public sealed partial class AzureSearchEmbedService(
                 ["id"] = imageId,
                 ["content"] = imageName,
                 ["category"] = "image",
-                ["imageEmbedding"] = embeddings.vector,
+                ["imageEmbedding"] = embeddings.Vector,
                 ["sourcefile"] = imageUrl,
             });
 
@@ -109,7 +109,7 @@ public sealed partial class AzureSearchEmbedService(
         return true;
     }
 
-    public async Task CreateSearchIndexAsync(string searchIndexName, CancellationToken ct = default)    
+    public async Task CreateSearchIndex(string searchIndexName, CancellationToken ct = default)    
     {
         string vectorSearchConfigName = "my-vector-config";
         string vectorSearchProfile = "my-vector-profile";
@@ -175,7 +175,7 @@ public sealed partial class AzureSearchEmbedService(
         await searchIndexClient.CreateIndexAsync(index);
     }
 
-    public async Task EnsureSearchIndexAsync(string searchIndexName, CancellationToken ct = default)
+    public async Task EnsureSearchIndex(string searchIndexName, CancellationToken ct = default)
     {
         var indexNames = searchIndexClient.GetIndexNamesAsync();
         await foreach (var page in indexNames.AsPages())
@@ -188,7 +188,7 @@ public sealed partial class AzureSearchEmbedService(
             }
         }
 
-        await CreateSearchIndexAsync(searchIndexName, ct);
+        await CreateSearchIndex(searchIndexName, ct);
     }
 
     public async Task<IReadOnlyList<PageDetail>> GetDocumentTextAsync(Stream blobStream, string blobName)
@@ -449,7 +449,7 @@ public sealed partial class AzureSearchEmbedService(
         var batch = new IndexDocumentsBatch<SearchDocument>();
         foreach (var section in sections)
         {
-            var embeddings = await openAIClient.GetEmbeddingsAsync(new Azure.AI.OpenAI.EmbeddingsOptions(embeddingModelName, [section.Content.Replace('\r', ' ')]));
+            var embeddings = await openAiClient.GetEmbeddingsAsync(new Azure.AI.OpenAI.EmbeddingsOptions(embeddingModelName, [section.Content.Replace('\r', ' ')]));
             var embedding = embeddings.Value.Data.FirstOrDefault()?.Embedding.ToArray() ?? [];
             batch.Actions.Add(new IndexDocumentsAction<SearchDocument>(
                 IndexActionType.MergeOrUpload,

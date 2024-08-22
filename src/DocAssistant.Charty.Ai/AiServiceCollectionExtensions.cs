@@ -65,13 +65,13 @@ public static class AiServiceCollectionExtensions
 						.AddAzureOpenAITextGeneration(deployedChtGptModelName, openAiClient)
 						.Build();
 
-					//var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "PhytonInterpreter");
-					//kernel.ImportPluginFromPromptDirectory(path);
+                    var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "CodeInterpreter");
+                    kernel.ImportPluginFromPromptDirectory(path);
 
-					//path = Path.Combine(AppContext.BaseDirectory, "Plugins", "DatabasePlugin");
-					//kernel.ImportPluginFromPromptDirectory(path);
+                    //path = Path.Combine(AppContext.BaseDirectory, "Plugins", "DatabasePlugin");
+                    //kernel.ImportPluginFromPromptDirectory(path);
 
-					return kernel;
+                    return kernel;
 				});
 
 		services.AddSingleton(

@@ -29,21 +29,21 @@ public class AzureSearchEmbedServiceTest
     public async Task EnsureSearchIndexWithoutImageEmbeddingsAsync()
     {
         var indexName = nameof(EnsureSearchIndexWithoutImageEmbeddingsAsync).ToLower();
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
         var azureSearchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var blobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? throw new InvalidOperationException();
         var blobContainer = "test";
 
         var azureCredential = new DefaultAzureCredential();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), azureCredential);
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), azureCredential);
         var searchClient = new SearchClient(new Uri(azureSearchEndpoint), indexName, azureCredential);
         var searchIndexClient = new SearchIndexClient(new Uri(azureSearchEndpoint), azureCredential);
         var documentAnalysisClient = new DocumentAnalysisClient(new Uri(azureSearchEndpoint), azureCredential);
         var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), azureCredential);
 
         var service = new AzureSearchEmbedService(
-            openAIClient: openAIClient,
+            openAiClient: openAiClient,
             embeddingModelName: embeddingDeployment,
             searchClient: searchClient,
             searchIndexName: indexName,
@@ -59,7 +59,7 @@ public class AzureSearchEmbedServiceTest
             // check if index exists
             var existsAction = async () => await searchIndexClient.GetIndexAsync(indexName);
             await existsAction.Should().ThrowAsync<RequestFailedException>();
-            await service.EnsureSearchIndexAsync(indexName);
+            await service.EnsureSearchIndex(indexName);
 
             var response = await searchIndexClient.GetIndexAsync(indexName);
             var index = response.Value;
@@ -86,14 +86,14 @@ public class AzureSearchEmbedServiceTest
     public async Task EnsureSearchIndexWithImageEmbeddingsAsync()
     {
         var indexName = nameof(EnsureSearchIndexWithImageEmbeddingsAsync).ToLower();
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
         var azureSearchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var blobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? throw new InvalidOperationException();
         var blobContainer = "test";
 
         var azureCredential = new DefaultAzureCredential();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), azureCredential);
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), azureCredential);
         var searchClient = new SearchClient(new Uri(azureSearchEndpoint), indexName, azureCredential);
         var searchIndexClient = new SearchIndexClient(new Uri(azureSearchEndpoint), azureCredential);
         var documentAnalysisClient = new DocumentAnalysisClient(new Uri(azureSearchEndpoint), azureCredential);
@@ -102,7 +102,7 @@ public class AzureSearchEmbedServiceTest
         computerVisionService.Dimension.Returns(1024);
 
         var service = new AzureSearchEmbedService(
-            openAIClient: openAIClient,
+            openAiClient: openAiClient,
             embeddingModelName: embeddingDeployment,
             searchClient: searchClient,
             searchIndexName: indexName,
@@ -118,7 +118,7 @@ public class AzureSearchEmbedServiceTest
             // check if index exists
             var existsAction = async () => await searchIndexClient.GetIndexAsync(indexName);
             await existsAction.Should().ThrowAsync<RequestFailedException>();
-            await service.EnsureSearchIndexAsync(indexName);
+            await service.EnsureSearchIndex(indexName);
 
             var response = await searchIndexClient.GetIndexAsync(indexName);
             var index = response.Value;
@@ -146,7 +146,7 @@ public class AzureSearchEmbedServiceTest
     public async Task GetDocumentTextTestAsync()
     {
         var indexName = nameof(GetDocumentTextTestAsync).ToLower();
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
         var azureSearchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var blobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? throw new InvalidOperationException();
@@ -154,14 +154,14 @@ public class AzureSearchEmbedServiceTest
         var blobContainer = "test";
 
         var azureCredential = new DefaultAzureCredential();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), azureCredential);
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), azureCredential);
         var searchClient = new SearchClient(new Uri(azureSearchEndpoint), indexName, azureCredential);
         var searchIndexClient = new SearchIndexClient(new Uri(azureSearchEndpoint), azureCredential);
         var documentAnalysisClient = new DocumentAnalysisClient(new Uri(azureFormRecognizerEndpoint), azureCredential);
         var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), azureCredential);
 
         var service = new AzureSearchEmbedService(
-            openAIClient: openAIClient,
+            openAiClient: openAiClient,
             embeddingModelName: embeddingDeployment,
             searchClient: searchClient,
             searchIndexName: indexName,
@@ -174,11 +174,11 @@ public class AzureSearchEmbedServiceTest
 
         try
         {
-            await service.EnsureSearchIndexAsync(indexName);
-            var benefitOptionsPDFName = "Benefit_Options.pdf";
-            var benefitOptionsPDFPath = Path.Combine("data", benefitOptionsPDFName);
-            using var stream = File.OpenRead(benefitOptionsPDFPath);
-            var pages = await service.GetDocumentTextAsync(stream, benefitOptionsPDFName);
+            await service.EnsureSearchIndex(indexName);
+            var benefitOptionsPdfName = "Benefit_Options.pdf";
+            var benefitOptionsPdfPath = Path.Combine("data", benefitOptionsPdfName);
+            using var stream = File.OpenRead(benefitOptionsPdfPath);
+            var pages = await service.GetDocumentTextAsync(stream, benefitOptionsPdfName);
             pages.Count.Should().Be(4);
         }
         finally
@@ -196,7 +196,7 @@ public class AzureSearchEmbedServiceTest
     public async Task EmbedBlobWithoutImageEmbeddingTestAsync()
     {
         var indexName = nameof(EmbedBlobWithoutImageEmbeddingTestAsync).ToLower();
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
         var azureSearchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var blobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? throw new InvalidOperationException();
@@ -204,7 +204,7 @@ public class AzureSearchEmbedServiceTest
         var blobContainer = nameof(EmbedBlobWithoutImageEmbeddingTestAsync).ToLower();
 
         var azureCredential = new DefaultAzureCredential();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), azureCredential);
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), azureCredential);
         var searchClient = new SearchClient(new Uri(azureSearchEndpoint), indexName, azureCredential);
         var searchIndexClient = new SearchIndexClient(new Uri(azureSearchEndpoint), azureCredential);
         var documentAnalysisClient = new DocumentAnalysisClient(new Uri(azureFormRecognizerEndpoint), azureCredential);
@@ -213,7 +213,7 @@ public class AzureSearchEmbedServiceTest
         await containerClient.CreateIfNotExistsAsync();
 
         var service = new AzureSearchEmbedService(
-            openAIClient: openAIClient,
+            openAiClient: openAiClient,
             embeddingModelName: embeddingDeployment,
             searchClient: searchClient,
             searchIndexName: indexName,
@@ -226,11 +226,11 @@ public class AzureSearchEmbedServiceTest
 
         try
         {
-            await service.EnsureSearchIndexAsync(indexName);
-            var benefitOptionsPDFName = "Benefit_Options.pdf";
-            var benefitOptionsPDFPath = Path.Combine("data", benefitOptionsPDFName);
-            using var stream = File.OpenRead(benefitOptionsPDFPath);
-            var isSucceed = await service.EmbedPDFBlobAsync(stream, benefitOptionsPDFName);
+            await service.EnsureSearchIndex(indexName);
+            var benefitOptionsPdfName = "Benefit_Options.pdf";
+            var benefitOptionsPdfPath = Path.Combine("data", benefitOptionsPdfName);
+            using var stream = File.OpenRead(benefitOptionsPdfPath);
+            var isSucceed = await service.EmbedPdfBlob(stream, benefitOptionsPdfName);
             isSucceed.Should().BeTrue();
 
             // check if the document page is uploaded to blob
@@ -256,7 +256,7 @@ public class AzureSearchEmbedServiceTest
     public async Task EmbedImageBlobTestAsync()
     {
         var indexName = nameof(EmbedImageBlobTestAsync).ToLower();
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
         var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
         var azureSearchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         var blobEndpoint = Environment.GetEnvironmentVariable("AZURE_STORAGE_BLOB_ENDPOINT") ?? throw new InvalidOperationException();
@@ -264,7 +264,7 @@ public class AzureSearchEmbedServiceTest
         var blobContainer = nameof(EmbedImageBlobTestAsync).ToLower();
 
         var azureCredential = new DefaultAzureCredential();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), azureCredential);
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), azureCredential);
         var searchClient = new SearchClient(new Uri(azureSearchEndpoint), indexName, azureCredential);
         var searchIndexClient = new SearchIndexClient(new Uri(azureSearchEndpoint), azureCredential);
         var documentAnalysisClient = new DocumentAnalysisClient(new Uri(azureFormRecognizerEndpoint), azureCredential);
@@ -273,10 +273,10 @@ public class AzureSearchEmbedServiceTest
         await containerClient.CreateIfNotExistsAsync();
         var computerVisionService = Substitute.For<IComputerVisionService>();
         computerVisionService.Dimension.Returns(1024);
-        computerVisionService.VectorizeImageAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(new ImageEmbeddingResponse("test", new float[1024])));
+        computerVisionService.VectorizeImage(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(new ImageEmbeddingResponse("test", new float[1024])));
 
         var service = new AzureSearchEmbedService(
-            openAIClient: openAIClient,
+            openAiClient: openAiClient,
             embeddingModelName: embeddingDeployment,
             searchClient: searchClient,
             searchIndexName: indexName,
@@ -289,14 +289,14 @@ public class AzureSearchEmbedServiceTest
 
         try
         {
-            await service.EnsureSearchIndexAsync(indexName);
+            await service.EnsureSearchIndex(indexName);
             var imageBlobName = "Financial Market Analysis Report 2023-04.png";
             var imagePath = Path.Combine("data", "imgs", imageBlobName);
             using var stream = File.OpenRead(imagePath);
             var client = containerClient.GetBlobClient(imageBlobName);
             await client.UploadAsync(stream, true);
             var url = client.Uri.AbsoluteUri;
-            var isSucceed = await service.EmbedImageBlobAsync(stream, imageBlobName, url);
+            var isSucceed = await service.EmbedImageBlob(stream, imageBlobName, url);
             isSucceed.Should().BeTrue();
 
             // check if the image is uploaded to blob

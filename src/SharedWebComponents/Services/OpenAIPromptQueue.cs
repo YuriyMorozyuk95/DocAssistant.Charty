@@ -2,9 +2,9 @@
 
 namespace SharedWebComponents.Services;
 
-public sealed class OpenAIPromptQueue(
+public sealed class OpenAiPromptQueue(
     IServiceProvider provider,
-    ILogger<OpenAIPromptQueue> logger)
+    ILogger<OpenAiPromptQueue> logger)
 {
     private readonly StringBuilder _responseBuffer = new();
     private Task? _processPromptTask = null;

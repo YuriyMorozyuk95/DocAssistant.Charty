@@ -15,7 +15,7 @@ namespace DocAssistant.Charty.Ai.Services;
 public interface IDocumentStorageService
 {
     string GetDocumentUrl(string documentId, string documentName, string index = "default");
-    Task<string> GetDocumentContentAsync(string documentId, string documentName, string index = "default");
+    Task<string> GetDocumentContent(string documentId, string documentName, string index = "default");
     
 }
 internal class DocumentStorageService : IDocumentStorageService
@@ -35,7 +35,7 @@ internal class DocumentStorageService : IDocumentStorageService
         _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
     }
 
-    public async Task<string> GetDocumentContentAsync(string documentId, string documentName, string index = "default")  
+    public async Task<string> GetDocumentContent(string documentId, string documentName, string index = "default")  
     {  
         var relativePath = $"{index}/{documentId}/{documentName}";  
   

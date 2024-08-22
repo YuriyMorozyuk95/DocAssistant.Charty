@@ -19,7 +19,7 @@ public sealed partial class VoiceChat : IDisposable
         .UseSoftlineBreakAsHardlineBreak()
         .Build();
 
-    [Inject] public required OpenAIPromptQueue OpenAIPrompts { get; set; }
+    [Inject] public required OpenAiPromptQueue OpenAiPrompts { get; set; }
     [Inject] public required IDialogService Dialog { get; set; }
     [Inject] public required ISpeechRecognitionService SpeechRecognition { get; set; }
     [Inject] public required ISpeechSynthesisService SpeechSynthesis { get; set; }
@@ -51,7 +51,7 @@ public sealed partial class VoiceChat : IDisposable
         _currentQuestion = new(_userQuestion, DateTime.Now);
         _questionAndAnswerMap[_currentQuestion] = null;
 
-        OpenAIPrompts.Enqueue(
+        OpenAiPrompts.Enqueue(
             _userQuestion,
             async (PromptResponse response) => await InvokeAsync(() =>
             {

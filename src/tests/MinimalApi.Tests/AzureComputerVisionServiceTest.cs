@@ -18,9 +18,9 @@ public class AzureComputerVisionServiceTest
         var imageUrl = @"https://learn.microsoft.com/azure/ai-services/computer-vision/media/quickstarts/presentation.png";
 
         var service = new AzureComputerVisionService(httpClient, endpoint, new DefaultAzureCredential());
-        var result = await service.VectorizeImageAsync(imageUrl);
+        var result = await service.VectorizeImage(imageUrl);
 
-        result.modelVersion.Should().NotBeNullOrEmpty();
+        result.ModelVersion.Should().NotBeNullOrEmpty();
 
         // download image to local file, and verify the api on local image.
         var tempFile = Path.GetTempFileName();
@@ -34,10 +34,10 @@ public class AzureComputerVisionServiceTest
             fileStream.Flush();
             fileStream.Close();
 
-            var localResult = await service.VectorizeImageAsync(tempFile);
+            var localResult = await service.VectorizeImage(tempFile);
 
-            localResult.modelVersion.Should().NotBeNullOrEmpty();
-            localResult.vector.Should().BeEquivalentTo(result.vector);
+            localResult.ModelVersion.Should().NotBeNullOrEmpty();
+            localResult.Vector.Should().BeEquivalentTo(result.Vector);
         }
         finally
         {
@@ -52,9 +52,9 @@ public class AzureComputerVisionServiceTest
         using var httpClient = new HttpClient();
         var service = new AzureComputerVisionService(httpClient, endpoint, new DefaultAzureCredential());
         var text = "Hello world";
-        var result = await service.VectorizeTextAsync(text);
+        var result = await service.VectorizeText(text);
 
-        result.modelVersion.Should().NotBeNullOrEmpty();
-        result.vector.Length.Should().Be(1024);
+        result.ModelVersion.Should().NotBeNullOrEmpty();
+        result.Vector.Length.Should().Be(1024);
     }
 }

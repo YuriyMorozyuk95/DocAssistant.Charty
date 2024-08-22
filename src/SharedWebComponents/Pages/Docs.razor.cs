@@ -26,7 +26,7 @@ public sealed partial class Docs : IDisposable
     public required ILogger<Docs> Logger { get; set; }
 
     [Inject]
-    public required IJSRuntime JSRuntime { get; set; }
+    public required IJSRuntime JsRuntime { get; set; }
 
     [Inject]
     public required IPdfViewer PdfViewer { get; set; }
@@ -67,7 +67,7 @@ public sealed partial class Docs : IDisposable
     {
         if (_fileUpload is { Files.Count: > 0 })
         {
-            var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
+            var cookie = await JsRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
 
             var result = await Client.UploadDocumentsAsync(
                 _fileUpload.Files, MaxIndividualFileSize, cookie);
@@ -102,7 +102,7 @@ public sealed partial class Docs : IDisposable
     }
 
     private ValueTask OnShowDocumentAsync(DocumentResponse document) =>
-        PdfViewer.ShowDocumentAsync(document.Name, document.Url.ToString());
+        PdfViewer.ShowDocument(document.Name, document.Url.ToString());
 
     public void Dispose() => _cancellationTokenSource.Cancel();
 }

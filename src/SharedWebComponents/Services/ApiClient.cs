@@ -36,9 +36,9 @@ public sealed class ApiClient(HttpClient httpClient)
             foreach (var file in files)
             {
                 // max allow size: 10mb
-                var max_size = maxAllowedSize * 1024 * 1024;
+                var maxSize = maxAllowedSize * 1024 * 1024;
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                var fileContent = new StreamContent(file.OpenReadStream(max_size));
+                var fileContent = new StreamContent(file.OpenReadStream(maxSize));
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
 
@@ -90,7 +90,7 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public Task<AnswerResult<ChatRequest>> ChatConversationAsync(ChatRequest request) => PostRequestAsync(request, "api/chat");
+    public Task<AnswerResult<ChatRequest>> ChatConversation(ChatRequest request) => PostRequestAsync(request, "api/chat");
 
     private async Task<AnswerResult<TRequest>> PostRequestAsync<TRequest>(
         TRequest request, string apiRoute) where TRequest : ApproachRequest

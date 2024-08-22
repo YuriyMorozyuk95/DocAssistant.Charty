@@ -13,8 +13,8 @@ internal static class SearchClientExtensions
     {
         var documentContents = string.Empty;
         var top = overrides?.Top ?? 3;
-        var exclude_category = overrides?.ExcludeCategory;
-        var filter = exclude_category == null ? string.Empty : $"category ne '{exclude_category}'";
+        var excludeCategory = overrides?.ExcludeCategory;
+        var filter = excludeCategory == null ? string.Empty : $"category ne '{excludeCategory}'";
         var useSemanticRanker = overrides?.SemanticRanker ?? false;
         var useSemanticCaptions = overrides?.SemanticCaptions ?? false;
 

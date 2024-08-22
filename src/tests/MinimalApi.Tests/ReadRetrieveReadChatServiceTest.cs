@@ -26,27 +26,27 @@ public class ReadRetrieveReadChatServiceTest
     public async Task NorthwindHealthQuestionTest_TextOnlyAsync()
     {
         var documentSearchService = Substitute.For<ISearchService>();
-        documentSearchService.QueryDocumentsAsync(Arg.Any<string?>(), Arg.Any<float[]?>(), Arg.Any<RequestOverrides?>(), Arg.Any<CancellationToken>())
+        documentSearchService.QueryDocuments(Arg.Any<string?>(), Arg.Any<float[]?>(), Arg.Any<RequestOverrides?>(), Arg.Any<CancellationToken>())
                 .Returns(new SupportingContentRecord[]
                 {
                     new SupportingContentRecord("Northwind_Health_Plus_Benefits_Details-52.pdf", "The Northwind Health Plus plan covers a wide range of services related to the treatment of SUD. These services include inpatient and outpatient treatment, counseling, and medications to help with recovery. It also covers mental health services and support for family members of those with SUD"),
                     new SupportingContentRecord("Northwind_Health_Plus_Benefits_Details-90.pdf", "This contract includes the plan documents that you receive from Northwind Health, the Northwind Health Plus plan summary, and any additional contracts or documents that you may have received from Northwind Health. It is important to remember that any changes made to this plan must be in writing and signed by both you and Northwind Health."),
                 });
 
-        var openAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
-        var openAIClient = new OpenAIClient(new Uri(openAIEndpoint), new DefaultAzureCredential());
+        var openAiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException();
+        var openAiClient = new OpenAIClient(new Uri(openAiEndpoint), new DefaultAzureCredential());
         var openAiEmbeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? throw new InvalidOperationException();
-        var openAIChatGptDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATGPT_DEPLOYMENT") ?? throw new InvalidOperationException();
+        var openAiChatGptDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATGPT_DEPLOYMENT") ?? throw new InvalidOperationException();
 
         var configuration = Substitute.For<IConfiguration>();
-        configuration["AzureOpenAiChatGptDeployment"].Returns(openAIChatGptDeployment);
+        configuration["AzureOpenAiChatGptDeployment"].Returns(openAiChatGptDeployment);
         configuration["AzureOpenAiEmbeddingDeployment"].Returns(openAiEmbeddingDeployment);
-        configuration["AzureOpenAiServiceEndpoint"].Returns(openAIEndpoint);
+        configuration["AzureOpenAiServiceEndpoint"].Returns(openAiEndpoint);
         configuration["AzureStorageAccountEndpoint"].Returns("https://northwindhealth.blob.core.windows.net/");
         configuration["AzureStorageContainer"].Returns("northwindhealth");
         configuration["UseAOAI"].Returns("true");
 
-        var chatService = new ReadRetrieveReadChatService(documentSearchService, openAIClient, configuration);
+        var chatService = new ReadRetrieveReadChatService(documentSearchService, openAiClient, configuration);
 
         var history = new ChatMessage[]
         {
@@ -86,8 +86,8 @@ public class ReadRetrieveReadChatServiceTest
         var azureCredential = new DefaultAzureCredential();
         var azureSearchService = new AzureSearchService(new SearchClient(new Uri(azureSearchServiceEndpoint), azureSearchIndex, azureCredential));
         
-        var openAIAPIKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException();
-        var openAIClient = new OpenAIClient(openAIAPIKey);
+        var openAiapiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException();
+        var openAiClient = new OpenAIClient(openAiapiKey);
 
         var azureComputerVisionEndpoint = Environment.GetEnvironmentVariable("AZURE_COMPUTERVISION_SERVICE_ENDPOINT") ?? throw new InvalidOperationException();
         using var httpClient = new HttpClient();
@@ -102,7 +102,7 @@ public class ReadRetrieveReadChatServiceTest
 
         var chatService = new ReadRetrieveReadChatService(
             azureSearchService,
-            openAIClient,
+            openAiClient,
             configuration,
             azureComputerVisionService,
             azureCredential);

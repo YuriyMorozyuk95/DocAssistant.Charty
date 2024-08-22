@@ -13,7 +13,7 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });
-builder.Services.AddScoped<OpenAIPromptQueue>();
+builder.Services.AddScoped<OpenAiPromptQueue>();
 builder.Services.AddLocalStorageServices();
 builder.Services.AddSessionStorageServices();
 builder.Services.AddSpeechSynthesisServices();

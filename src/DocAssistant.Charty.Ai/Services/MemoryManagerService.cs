@@ -43,7 +43,7 @@ public interface IMemoryManagerService
 			_containerName = configuration["KernelMemory:Services:AzureBlobs:Container"];
 		}
 
-		public async Task UploadMemory(
+		public async Task UploadMemoryAsync(
 			string id,
 			string fileName,
 			Stream stream,
@@ -54,7 +54,7 @@ public interface IMemoryManagerService
 
 			try
 			{
-				await CreateContainerIfNotExist();
+				await CreateContainerIfNotExistAsync();
 
 				
 
@@ -97,12 +97,12 @@ public interface IMemoryManagerService
 			}
 		}
 
-		public async Task<string> UploadToDataWarehouseSchemaMemory(
+		public async Task<string> UploadToDataWarehouseSchemaMemoryAsync(
 			string record,
 			string type,
 			CancellationToken cancellationToken = default)
 		{
-			await CreateContainerIfNotExist();
+			await CreateContainerIfNotExistAsync();
 
 			var id = Guid.NewGuid().ToString();
 
@@ -126,7 +126,7 @@ public interface IMemoryManagerService
 				cancellationToken: cancellationToken);
 		}
 
-		public async Task CreateContainerIfNotExist()
+		public async Task CreateContainerIfNotExistAsync()
 		{
 			// Create the container client.    
 			BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
@@ -135,7 +135,7 @@ public interface IMemoryManagerService
 			await containerClient.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
 		}
 
-		public async Task RemoveMemory()
+		public async Task RemoveMemoryAsync()
 		{
 			BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
 			await containerClient.DeleteIfExistsAsync();
@@ -147,7 +147,7 @@ public interface IMemoryManagerService
 			}
 		}
 
-		public async Task RemoveDataWarehouseSchemaIndex()
+		public async Task RemoveDataWarehouseSchemaIndexAsync()
 		{
 			await _searchIndexClient.DeleteIndexAsync(DataWarehouseSchemaIndex);
 		}

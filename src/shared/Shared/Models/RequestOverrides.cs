@@ -36,10 +36,10 @@ public record RequestOverrides
     public bool? SuggestFollowupQuestions { get; set; } = true;
 
     [JsonPropertyName("use_gpt4v")]
-    public bool? UseGPT4V { get; set; } = false;
+    public bool? UseGpt4V { get; set; } = false;
 
     [JsonPropertyName("use_oid_security_filter")]
-    public bool? UseOIDSecurityFilter { get; set; } = false;
+    public bool? UseOidSecurityFilter { get; set; } = false;
 
     [JsonPropertyName("use_groups_security_filter")]
     public bool? UseGroupsSecurityFilter { get; set; } = false;

@@ -18,5 +18,7 @@
     <PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" />
   </ItemGroup>
 
-
+  <PropertyGroup>  
+    <NoWarn>IDE1006</NoWarn>  
+  </PropertyGroup>  
 </Project>

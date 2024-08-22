@@ -1,7 +1,7 @@
 ﻿<MudDialog DisableSidePadding="true">
     <DialogContent>
         <MudContainer Class="pdf-container">
-            <div style="@_pdfViewerVisibilityStyle">
+            <div style="@PdfViewerVisibilityStyle">
                 <iframe id="pdf-viewer" src="@(FileName.ToCitationUrl(BaseUrl))" title="@FileName" />
             </div>
             @if (_isLoading)

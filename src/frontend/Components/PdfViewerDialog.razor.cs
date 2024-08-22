@@ -5,7 +5,7 @@ namespace ClientApp.Components;
 public sealed partial class PdfViewerDialog
 {
     private bool _isLoading = true;
-    private string _pdfViewerVisibilityStyle => _isLoading ? "display:none;" : "display:default;";
+    private string PdfViewerVisibilityStyle => _isLoading ? "display:none;" : "display:default;";
 
     [Parameter] public required string FileName { get; set; }
     [Parameter] public required string BaseUrl { get; set; }

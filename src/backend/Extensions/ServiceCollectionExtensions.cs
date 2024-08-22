@@ -55,23 +55,23 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<OpenAIClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var useAOAI = config["UseAOAI"] == "true";
-            if (useAOAI)
+            var useAoai = config["UseAOAI"] == "true";
+            if (useAoai)
             {
                 var azureOpenAiServiceEndpoint = config["AzureOpenAiServiceEndpoint"];
                 ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint);
 
-                var openAIClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), s_azureCredential);
+                var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), s_azureCredential);
 
-                return openAIClient;
+                return openAiClient;
             }
             else
             {
-                var openAIApiKey = config["OpenAIApiKey"];
-                ArgumentNullException.ThrowIfNullOrEmpty(openAIApiKey);
+                var openAiApiKey = config["OpenAIApiKey"];
+                ArgumentNullException.ThrowIfNullOrEmpty(openAiApiKey);
 
-                var openAIClient = new OpenAIClient(openAIApiKey);
-                return openAIClient;
+                var openAiClient = new OpenAIClient(openAiApiKey);
+                return openAiClient;
             }
         });
 
@@ -80,7 +80,7 @@ internal static class ServiceCollectionExtensions
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var useVision = config["UseVision"] == "true";
-            var openAIClient = sp.GetRequiredService<OpenAIClient>();
+            var openAiClient = sp.GetRequiredService<OpenAIClient>();
             var searchClient = sp.GetRequiredService<ISearchService>();
             if (useVision)
             {
@@ -89,11 +89,11 @@ internal static class ServiceCollectionExtensions
                 var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
                 
                 var visionService = new AzureComputerVisionService(httpClient, azureComputerVisionServiceEndpoint, s_azureCredential);
-                return new ReadRetrieveReadChatService(searchClient, openAIClient, config, visionService, s_azureCredential);
+                return new ReadRetrieveReadChatService(searchClient, openAiClient, config, visionService, s_azureCredential);
             }
             else
             {
-                return new ReadRetrieveReadChatService(searchClient, openAIClient, config, tokenCredential: s_azureCredential);
+                return new ReadRetrieveReadChatService(searchClient, openAiClient, config, tokenCredential: s_azureCredential);
             }
         });
 
