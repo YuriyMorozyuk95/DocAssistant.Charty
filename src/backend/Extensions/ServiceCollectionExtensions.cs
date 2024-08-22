@@ -1,101 +1,132 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Net;
+
+using Azure.Core;
+using Azure.Core.Pipeline;
+using Azure.Search.Documents.Indexes;
+
 namespace MinimalApi.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    private static readonly DefaultAzureCredential s_azureCredential = new();
-
     internal static IServiceCollection AddAzureServices(this IServiceCollection services)
     {
-        services.AddSingleton<BlobServiceClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var azureStorageAccountEndpoint = config["AzureStorageAccountEndpoint"];
-            ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountEndpoint);
+        services.AddSingleton<TokenCredential, DefaultAzureCredential>();
 
-            var blobServiceClient = new BlobServiceClient(
-                new Uri(azureStorageAccountEndpoint), s_azureCredential);
+		services.AddSingleton(
+			sp =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+					string accountName = config["KernelMemory:Services:AzureBlobs:Account"];  
+					string endpointSuffix = config["KernelMemory:Services:AzureBlobs:EndpointSuffix"];
 
-            return blobServiceClient;
-        });
+					string blobEndpoint = $"https://{accountName}.blob.{endpointSuffix}";  
+  
+					// Create a BlobServiceClient that will authenticate through Active Directory  
+					var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), sp.GetRequiredService<TokenCredential>());  
+					return blobServiceClient;
+				});
 
-        services.AddSingleton<BlobContainerClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var azureStorageContainer = config["AzureStorageContainer"];
-            return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
-        });
+		services.AddSingleton(
+			sp =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+					var azureStorageContainer = config["KernelMemory:Services:AzureBlobs:Container"];
+					return sp.GetRequiredService<BlobServiceClient>()
+						.GetBlobContainerClient(azureStorageContainer);
+				});
 
-        services.AddSingleton<ISearchService, AzureSearchService>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var azureSearchServiceEndpoint = config["AzureSearchServiceEndpoint"];
-            ArgumentNullException.ThrowIfNullOrEmpty(azureSearchServiceEndpoint);
+		services.AddSingleton(
+			sp =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+					var azureSearchServiceEndpoint = config["KernelMemory:Services:AzureAISearch:Endpoint"];
 
-            var azureSearchIndex = config["AzureSearchIndex"];
-            ArgumentNullException.ThrowIfNullOrEmpty(azureSearchIndex);
+					var credential = sp.GetRequiredService<TokenCredential>();
 
-            var searchClient = new SearchClient(
-                               new Uri(azureSearchServiceEndpoint), azureSearchIndex, s_azureCredential);
+					var searchIndexClient = new SearchIndexClient(
+						new Uri(azureSearchServiceEndpoint!),
+						credential,
+						new SearchClientOptions
+						{
+							Transport = new HttpClientTransport(
+								new HttpClient(
+									new HttpClientHandler()
+									{
+										Proxy = new WebProxy()
+												{
+													BypassProxyOnLocal = false,
+													UseDefaultCredentials = true,
+												}
+									}))
+						});
 
-            return new AzureSearchService(searchClient);
-        });
+					return searchIndexClient;
+				});
 
-        services.AddSingleton<DocumentAnalysisClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var azureOpenAiServiceEndpoint = config["AzureOpenAiServiceEndpoint"] ?? throw new ArgumentNullException();
+		services.AddSingleton(
+			sp =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+					var documentIntelligenceEndpoint = config["AzureDocumentIntelligenceEndpoint"];
 
-            var documentAnalysisClient = new DocumentAnalysisClient(
-                new Uri(azureOpenAiServiceEndpoint), s_azureCredential);
-            return documentAnalysisClient;
-        });
+					ArgumentNullException.ThrowIfNullOrEmpty(documentIntelligenceEndpoint);
 
-        services.AddSingleton<OpenAIClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var useAoai = config["UseAOAI"] == "true";
-            if (useAoai)
-            {
-                var azureOpenAiServiceEndpoint = config["AzureOpenAiServiceEndpoint"];
-                ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint);
+					var credential = sp.GetRequiredService<TokenCredential>();
 
-                var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), s_azureCredential);
+					var documentAnalysisClient = new DocumentAnalysisClient(
+						new Uri(documentIntelligenceEndpoint),
+						credential,
+						new DocumentAnalysisClientOptions
+						{
+							Transport = new HttpClientTransport(
+								new HttpClient(
+									new HttpClientHandler()
+									{
+										Proxy = new WebProxy()
+												{
+													BypassProxyOnLocal = false,
+													UseDefaultCredentials = true,
+												}
+									}))
+						});
+					return documentAnalysisClient;
+				});
 
-                return openAiClient;
-            }
-            else
-            {
-                var openAiApiKey = config["OpenAIApiKey"];
-                ArgumentNullException.ThrowIfNullOrEmpty(openAiApiKey);
+		services.AddSingleton(
+			sp =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+					var azureOpenAiServiceEndpoint = config["KernelMemory:Services:AzureOpenAIText:Endpoint"];
 
-                var openAiClient = new OpenAIClient(openAiApiKey);
-                return openAiClient;
-            }
-        });
+					ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint);
 
-        services.AddSingleton<AzureBlobStorageService>();
-        services.AddSingleton<ReadRetrieveReadChatService>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var useVision = config["UseVision"] == "true";
-            var openAiClient = sp.GetRequiredService<OpenAIClient>();
-            var searchClient = sp.GetRequiredService<ISearchService>();
-            if (useVision)
-            {
-                var azureComputerVisionServiceEndpoint = config["AzureComputerVisionServiceEndpoint"];
-                ArgumentNullException.ThrowIfNullOrEmpty(azureComputerVisionServiceEndpoint);
-                var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-                
-                var visionService = new AzureComputerVisionService(httpClient, azureComputerVisionServiceEndpoint, s_azureCredential);
-                return new ReadRetrieveReadChatService(searchClient, openAiClient, config, visionService, s_azureCredential);
-            }
-            else
-            {
-                return new ReadRetrieveReadChatService(searchClient, openAiClient, config, tokenCredential: s_azureCredential);
-            }
-        });
+					var credential = sp.GetRequiredService<TokenCredential>();
+
+					var openAiClient = new OpenAIClient(
+						new Uri(azureOpenAiServiceEndpoint),
+						credential,
+						new OpenAIClientOptions
+						{
+							Diagnostics =
+							{
+								IsLoggingContentEnabled = true
+							},
+							Transport = new HttpClientTransport(
+								new HttpClient(
+									new HttpClientHandler()
+									{
+										Proxy = new WebProxy()
+												{
+													BypassProxyOnLocal = false,
+													UseDefaultCredentials = true,
+												}
+									}))
+						});
+
+					return openAiClient;
+				});
 
         return services;
     }

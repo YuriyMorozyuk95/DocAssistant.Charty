@@ -13,15 +13,15 @@ public class ReadRetrieveReadChatService
     private readonly ISearchService _searchClient;
     private readonly Kernel _kernel;
     private readonly IConfiguration _configuration;
-    private readonly IComputerVisionService? _visionService;
-    private readonly TokenCredential? _tokenCredential;
+    private readonly IComputerVisionService _visionService;
+    private readonly TokenCredential _tokenCredential;
 
     public ReadRetrieveReadChatService(
         ISearchService searchClient,
         OpenAIClient client,
         IConfiguration configuration,
-        IComputerVisionService? visionService = null,
-        TokenCredential? tokenCredential = null)
+        IComputerVisionService visionService = null,
+        TokenCredential tokenCredential = null)
     {
         _searchClient = searchClient;
         var kernelBuilder = Kernel.CreateBuilder();
@@ -58,7 +58,7 @@ public class ReadRetrieveReadChatService
 
     public async Task<ChatAppResponse> ReplyAsync(
         ChatMessage[] history,
-        RequestOverrides? overrides,
+        RequestOverrides overrides,
         CancellationToken cancellationToken = default)
     {
         var top = overrides?.Top ?? 3;
@@ -68,12 +68,12 @@ public class ReadRetrieveReadChatService
         var filter = excludeCategory is null ? null : $"category ne '{excludeCategory}'";
         var chat = _kernel.GetRequiredService<IChatCompletionService>();
         var embedding = _kernel.GetRequiredService<ITextEmbeddingGenerationService>();
-        float[]? embeddings = null;
+        float[] embeddings = null;
         var question = history.LastOrDefault(m => m.IsUser)?.Content is { } userQuestion
             ? userQuestion
             : throw new InvalidOperationException("Use question is null");
 
-        string[]? followUpQuestionList = null;
+        string[] followUpQuestionList = null;
         if (overrides?.RetrievalMode != RetrievalMode.Text && embedding is not null)
         {
             embeddings = (await embedding.GenerateEmbeddingAsync(question, cancellationToken: cancellationToken)).ToArray();
@@ -81,7 +81,7 @@ public class ReadRetrieveReadChatService
 
         // step 1
         // use llm to get query if retrieval mode is not vector
-        string? query = null;
+        string query = null;
         if (overrides?.RetrievalMode != RetrievalMode.Vector)
         {
             var getQueryChat = new ChatHistory(@"You are a helpful AI assistant, generate search query for followup question.
@@ -115,7 +115,7 @@ standard plan AND dental AND employee benefit.
 
         // step 2.5
         // retrieve images if _visionService is available
-        SupportingImageRecord[]? images = default;
+        SupportingImageRecord[] images = default;
         if (_visionService is not null)
         {
             var queryEmbeddings = await _visionService.VectorizeText(query ?? question, cancellationToken);

@@ -6,9 +6,9 @@ internal static class SearchClientExtensions
 {
     internal static async Task<SupportingContentRecord[]> QueryDocumentsAsync(
         this SearchClient searchClient,
-        string? query = null,
-        float[]? embedding = null,
-        RequestOverrides? overrides = null,
+        string query = null,
+        float[] embedding = null,
+        RequestOverrides overrides = null,
         CancellationToken cancellationToken = default)
     {
         var documentContents = string.Empty;
@@ -78,7 +78,7 @@ internal static class SearchClientExtensions
         foreach (var doc in searchResult.GetResults())
         {
             doc.Document.TryGetValue("sourcepage", out var sourcePageValue);
-            string? contentValue;
+            string contentValue;
             try
             {
                 if (useSemanticCaptions)

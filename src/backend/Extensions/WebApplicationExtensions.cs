@@ -9,21 +9,21 @@ internal static class WebApplicationExtensions
         var api = app.MapGroup("api");
 
         // Blazor 📎 Clippy streaming endpoint
-        api.MapPost("openai/chat", OnPostChatPromptAsync);
+        //api.MapPost("openai/chat", OnPostChatPromptAsync);
 
-        // Long-form chat w/ contextual history endpoint
-        api.MapPost("chat", OnPostChatAsync);
+        //// Long-form chat w/ contextual history endpoint
+        //api.MapPost("chat", OnPostChatAsync);
 
-        // Upload a document
-        api.MapPost("documents", OnPostDocumentAsync);
+        //// Upload a document
+        //api.MapPost("documents", OnPostDocumentAsync);
 
-        // Get all documents
-        api.MapGet("documents", OnGetDocumentsAsync);
+        //// Get all documents
+        //api.MapGet("documents", OnGetDocumentsAsync);
 
-        // Get DALL-E image result from prompt
-        api.MapPost("images", OnPostImagePromptAsync);
+        //// Get DALL-E image result from prompt
+        //api.MapPost("images", OnPostImagePromptAsync);
 
-        api.MapGet("enableLogout", OnGetEnableLogout);
+        //api.MapGet("enableLogout", OnGetEnableLogout);
 
         return app;
     }

@@ -17,6 +17,15 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" />
     <PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Plugins\CodeInterpreter\GeneratePython\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Plugins\CodeInterpreter\GeneratePython\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <PropertyGroup>  
     <NoWarn>IDE1006</NoWarn>  
