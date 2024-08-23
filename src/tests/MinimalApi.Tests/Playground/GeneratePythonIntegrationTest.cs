@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using DocAssistant.Charty.Ai.Extensions;
+
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,7 +34,7 @@ public class GeneratePythonIntegrationTest : IClassFixture<WebApplicationFactory
   
         // Act  
         var result = await kernel.InvokeAsync(function, new() { ["input"] = prompt });  
-        var pythonCode = result.ToString();  
+        var pythonCode = result.ExtractTagContent("PythonCode");  
         _testOutputHelper.WriteLine("Generated Python Code:");  
         _testOutputHelper.WriteLine(pythonCode);  
   

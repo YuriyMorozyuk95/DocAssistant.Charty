@@ -6,20 +6,85 @@ Generate Python code based on the user's prompt.
 ## Instructions  
 Using the user's prompt, generate a Python code snippet that accomplishes the described task. Ensure the code is syntactically correct and follows best practices.  
   
+## Tags  
+<Context>You are tasked with translating a user's natural language prompt into Python code. Python is a versatile programming language used for various applications including web development, data analysis, machine learning, and more.</Context>  
+<PythonCodingRules>1. Ensure the code is syntactically correct. 2. Follow Python best practices, such as using meaningful variable names and adding comments where necessary.</PythonCodingRules>  
+<UsefulFacts>You may or may not need these depending on the user query:</UsefulFacts>  
+<UsefulVariables>- User's input prompt -> {{$input}}</UsefulVariables>  
+  
 ## Example Prompts and Responses  
   
-### Example 1  
-**User:**  
-Generate Python code that prints 'Hello, World!'  
+<Examples>  
+  <Example>  
+    <UserInput>  
+      Generate Python code that prints 'Hello, World!'  
+    </UserInput>  
+    <AssistantResponse>  
+      <PythonCode>  
+        print('Hello, World!')  
+      </PythonCode>  
+    </AssistantResponse>  
+  </Example>  
   
-**Response:**  
-```python  
-print('Hello, World!')  
+  <Example>  
+    <UserInput>  
+Please create chart for this table:
 
-### Example 2  
-**User:**  
-{{$input}}
+| Month    | Sales ($) |  
+|----------|-----------|  
+| January  | 5000      |  
+| February | 6000      |  
+| March    | 7000      |  
+| April    | 8000      |  
+| May      | 7500      |  
+| June     | 8500      |  
+| July     | 9000      |  
+| August   | 9500      |  
+| September| 10000     |  
+| October  | 10500     |  
+| November | 11000     |  
+| December | 12000     |  
+    </UserInput>  
+    <AssistantResponse>  
+      <PythonCode>  
+import matplotlib.pyplot as plt  
   
-**Response:**  
-```python  
-
+# Data from the table  
+months = [  
+    "January", "February", "March", "April", "May", "June",  
+    "July", "August", "September", "October", "November", "December"  
+]  
+sales = [5000, 6000, 7000, 8000, 7500, 8500, 9000, 9500, 10000, 10500, 11000, 12000]  
+  
+# Create the plot  
+plt.figure(figsize=(10, 6))  
+plt.plot(months, sales, marker='o', linestyle='-', color='b')  
+  
+# Add titles and labels  
+plt.title('Monthly Sales Data')  
+plt.xlabel('Month')  
+plt.ylabel('Sales ($)')  
+plt.xticks(rotation=45)  # Rotate month labels for better readability  
+  
+# Show the plot  
+plt.tight_layout()  
+plt.show()  
+ 
+      </PythonCode>  
+    </AssistantResponse>  
+  </Example>  
+</Examples>  
+  
+<FinalInstructions>  
+To translate this prompt into Python code, follow these guidelines:  
+1. Identify the key elements in the user's prompt, such as tasks, functions, and conditions.  
+2. Map these elements to the appropriate Python syntax.  
+3. Write your Python code inside <PythonCode> tags.  
+4. After providing the Python code, explain your translation process inside <Scratchpad> tags. Describe how you interpreted the user's prompt and how you mapped it to Python syntax.  
+5. Remember to use proper Python syntax and structure. If the user's prompt is ambiguous or lacks necessary information to create a complete Python code snippet, make reasonable assumptions and mention them in your explanation.  
+</FinalInstructions>  
+  
+---  
+  
+User Input: {{$input}}  
+Assistant Response:  
