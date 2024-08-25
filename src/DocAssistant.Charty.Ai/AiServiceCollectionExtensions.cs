@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.ClientModel;
+using System.ClientModel.Primitives;
+using System.Net;
 
 using Azure.AI.OpenAI;
 using Azure.Core;
@@ -11,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
+
+using OpenAI;
 
 namespace DocAssistant.Charty.Ai;
 
@@ -28,26 +32,24 @@ public static class AiServiceCollectionExtensions
 
 					var credential = sp.GetRequiredService<TokenCredential>();
 
-					var openAiClient = new OpenAIClient(
-						new Uri(azureOpenAiServiceEndpoint),
-						credential,
-						new OpenAIClientOptions
-						{
-							Diagnostics =
-							{
-								IsLoggingContentEnabled = true
-							},
-							Transport = new HttpClientTransport(
-								new HttpClient(
-									new HttpClientHandler()
-									{
-										Proxy = new WebProxy()
-												{
-													BypassProxyOnLocal = false,
-													UseDefaultCredentials = true,
-												}
-									}))
-						});
+					//var openAiClient = new OpenAIClient(
+					//	,
+					//	credential,
+					//	new OpenAIClientOptions
+					//	{
+					//		Transport = new HttpClientPipelineTransport(
+					//			new HttpClient(
+					//				new HttpClientHandler()
+					//				{
+					//					Proxy = new WebProxy()
+					//							{
+					//								BypassProxyOnLocal = false,
+					//								UseDefaultCredentials = true,
+					//							}
+					//				}))
+					//	});
+
+                    var openAiClient = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint), credential);
 
 					return openAiClient;
 				});
@@ -56,13 +58,12 @@ public static class AiServiceCollectionExtensions
 			sp =>
 				{
 					var config = sp.GetRequiredService<IConfiguration>();
-					var openAiClient = sp.GetRequiredService<OpenAIClient>();
+					var openAiClient = sp.GetRequiredService<AzureOpenAIClient>();
 
 					var deployedChtGptModelName = config["AzureOpenAiChatGptDeployment"];
 
 					var kernel = Kernel.CreateBuilder()
-						.AddAzureOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
-						.AddAzureOpenAITextGeneration(deployedChtGptModelName, openAiClient)
+						.AddOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
 						.Build();
 
                     var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "CodeInterpreter");

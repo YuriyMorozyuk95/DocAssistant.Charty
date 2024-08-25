@@ -18,7 +18,7 @@ public class ReadRetrieveReadChatService
 
     public ReadRetrieveReadChatService(
         ISearchService searchClient,
-        OpenAIClient client,
+        AzureOpenAIClient client,
         IConfiguration configuration,
         IComputerVisionService visionService = null,
         TokenCredential tokenCredential = null)
@@ -45,8 +45,8 @@ public class ReadRetrieveReadChatService
             {
                 var endpoint = configuration["AzureOpenAiServiceEndpoint"];
                 ArgumentNullException.ThrowIfNullOrWhiteSpace(endpoint);
-                kernelBuilder = kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(embeddingModelName, endpoint, tokenCredential ?? new DefaultAzureCredential());
-                kernelBuilder = kernelBuilder.AddAzureOpenAIChatCompletion(deployedModelName, endpoint, tokenCredential ?? new DefaultAzureCredential());
+                //kernelBuilder = kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(embeddingModelName, endpoint, tokenCredential ?? new DefaultAzureCredential());
+                //kernelBuilder = kernelBuilder.AddAzureOpenAIChatCompletion(deployedModelName, endpoint, tokenCredential ?? new DefaultAzureCredential());
             }
         }
 

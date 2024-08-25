@@ -36,39 +36,39 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(enableLogout);
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(
-        PromptRequest prompt,
-        OpenAIClient client,
-        IConfiguration config,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var deploymentId = config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
-        var response = await client.GetChatCompletionsStreamingAsync(
-            new ChatCompletionsOptions
-            {
-                DeploymentName = deploymentId,
-                Messages =
-                {
-                    new ChatRequestSystemMessage("""
-                        You're an AI assistant for developers, helping them write code more efficiently.
-                        You're name is **Blazor 📎 Clippy** and you're an expert Blazor developer.
-                        You're also an expert in ASP.NET Core, C#, TypeScript, and even JavaScript.
-                        You will always reply with a Markdown formatted response.
-                        """),
-                    new ChatRequestUserMessage("What's your name?"),
-                    new ChatRequestAssistantMessage("Hi, my name is **Blazor 📎 Clippy**! Nice to meet you."),
-                    new ChatRequestUserMessage(prompt.Prompt)
-                }
-            }, cancellationToken);
+    //private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(
+    //    PromptRequest prompt,
+    //    AzureOpenAIClient client,
+    //    IConfiguration config,
+    //    [EnumeratorCancellation] CancellationToken cancellationToken)
+    //{
+    //    var deploymentId = config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
+    //    var response = await client.GetChatCompletionsStreamingAsync(
+    //        new ChatCompletionsOptions
+    //        {
+    //            DeploymentName = deploymentId,
+    //            Messages =
+    //            {
+    //                new ChatRequestSystemMessage("""
+    //                    You're an AI assistant for developers, helping them write code more efficiently.
+    //                    You're name is **Blazor 📎 Clippy** and you're an expert Blazor developer.
+    //                    You're also an expert in ASP.NET Core, C#, TypeScript, and even JavaScript.
+    //                    You will always reply with a Markdown formatted response.
+    //                    """),
+    //                new ChatRequestUserMessage("What's your name?"),
+    //                new ChatRequestAssistantMessage("Hi, my name is **Blazor 📎 Clippy**! Nice to meet you."),
+    //                new ChatRequestUserMessage(prompt.Prompt)
+    //            }
+    //        }, cancellationToken);
 
-        await foreach (var choice in response.WithCancellation(cancellationToken))
-        {
-            if (choice.ContentUpdate is { Length: > 0 })
-            {
-                yield return new ChatChunkResponse(choice.ContentUpdate.Length, choice.ContentUpdate);
-            }
-        }
-    }
+    //    await foreach (var choice in response.WithCancellation(cancellationToken))
+    //    {
+    //        if (choice.ContentUpdate is { Length: > 0 })
+    //        {
+    //            yield return new ChatChunkResponse(choice.ContentUpdate.Length, choice.ContentUpdate);
+    //        }
+    //    }
+    //}
 
     private static async Task<IResult> OnPostChatAsync(
         ChatRequest request,
@@ -140,21 +140,21 @@ internal static class WebApplicationExtensions
         }
     }
 
-    private static async Task<IResult> OnPostImagePromptAsync(
-        PromptRequest prompt,
-        OpenAIClient client,
-        IConfiguration config,
-        CancellationToken cancellationToken)
-    {
-        var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
-        {
-            Prompt = prompt.Prompt,
-        },
-        cancellationToken);
+    //private static async Task<IResult> OnPostImagePromptAsync(
+    //    PromptRequest prompt,
+    //    AzureOpenAIClient client,
+    //    IConfiguration config,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
+    //    {
+    //        Prompt = prompt.Prompt,
+    //    },
+    //    cancellationToken);
 
-        var imageUrls = result.Value.Data.Select(i => i.Url).ToList();
-        var response = new ImageResponse(result.Value.Created, imageUrls);
+    //    var imageUrls = result.Value.Data.Select(i => i.Url).ToList();
+    //    var response = new ImageResponse(result.Value.Created, imageUrls);
 
-        return TypedResults.Ok(response);
-    }
+    //    return TypedResults.Ok(response);
+    //}
 }

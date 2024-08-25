@@ -4,9 +4,9 @@ namespace SharedWebComponents.Models;
 
 public record class VoicePreferences
 {
-    private const string PreferredVoiceKey = "preferred-voice";
-    private const string PreferredSpeedKey = "preferred-speed";
-    private const string TtsIsEnabledKey = "tts-is-enabled";
+    private const string s_preferredVoiceKey = "preferred-voice";
+    private const string s_preferredSpeedKey = "preferred-speed";
+    private const string s_ttsIsEnabledKey = "tts-is-enabled";
 
     private string? _voice;
     private double? _rate;
@@ -18,41 +18,41 @@ public record class VoicePreferences
 
     public string? Voice
     {
-        get => _voice ??= _storage.GetItem<string>(PreferredVoiceKey);
+        get => _voice ??= _storage.GetItem<string>(s_preferredVoiceKey);
         set
         {
             if (_voice != value && value is not null)
             {
                 _voice = value;
-                _storage.SetItem<string>(PreferredVoiceKey, value);
+                _storage.SetItem<string>(s_preferredVoiceKey, value);
             }
         }
     }
 
     public double Rate
     {
-        get => _rate ??= _storage.GetItem<double>(PreferredSpeedKey) is double rate
+        get => _rate ??= _storage.GetItem<double>(s_preferredSpeedKey) is double rate
             && rate > 0 ? rate : 1;
         set
         {
             if (_rate != value)
             {
                 _rate = value;
-                _storage.SetItem<double>(PreferredSpeedKey, value);
+                _storage.SetItem<double>(s_preferredSpeedKey, value);
             }
         }
     }
 
     public bool IsEnabled
     {
-        get => _isEnabled ??= (_storage.GetItem<bool?>(TtsIsEnabledKey) is { } enabled
+        get => _isEnabled ??= (_storage.GetItem<bool?>(s_ttsIsEnabledKey) is { } enabled
             && enabled);
         set
         {
             if (_isEnabled != value)
             {
                 _isEnabled = value;
-                _storage.SetItem<bool?>(TtsIsEnabledKey, value);
+                _storage.SetItem<bool?>(s_ttsIsEnabledKey, value);
             }
         }
     }

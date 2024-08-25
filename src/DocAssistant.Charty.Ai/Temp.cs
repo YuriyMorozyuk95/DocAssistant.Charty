@@ -1,6 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-
-namespace DocAssistant.Charty.Ai;
+﻿namespace DocAssistant.Charty.Ai;
 
 public static class TagsKeys
 {

@@ -4,7 +4,7 @@ namespace SharedWebComponents.Pages;
 
 public sealed partial class Docs : IDisposable
 {
-    private const long MaxIndividualFileSize = 1_024L * 1_024;
+    private const long s_maxIndividualFileSize = 1_024L * 1_024;
 
     private MudForm _form = null!;
     private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
@@ -70,7 +70,7 @@ public sealed partial class Docs : IDisposable
             var cookie = await JsRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
 
             var result = await Client.UploadDocumentsAsync(
-                _fileUpload.Files, MaxIndividualFileSize, cookie);
+                _fileUpload.Files, s_maxIndividualFileSize, cookie);
 
             Logger.LogInformation("Result: {x}", result);
 
