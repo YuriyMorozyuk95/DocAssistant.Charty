@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 using System.Text.Json.Serialization;
-using Azure.AI.OpenAI;
 
 namespace Shared.Models;
 
@@ -21,14 +20,10 @@ public record Thoughts(
 
 public record ResponseContext(
     [property: JsonPropertyName("dataPointsContent")] SupportingContentRecord[]? DataPointsContent,
-    [property: JsonPropertyName("dataPointsImages")] SupportingImageRecord[]? DataPointsImages,
-    [property: JsonPropertyName("followup_questions")] string[] FollowupQuestions,
-    [property: JsonPropertyName("thoughts")] Thoughts[] Thoughts)
+    [property: JsonPropertyName("dataPointsImages")] SupportingImageRecord[]? DataPointsImages)
 {
     [JsonPropertyName("data_points")]
     public DataPoints DataPoints { get => new DataPoints(DataPointsContent?.Select(x => $"{x.Title}: {x.Content}").ToArray() ?? Array.Empty<string>()); }
-
-    public string ThoughtsString { get => string.Join("\n", Thoughts.Select(x => $"{x.Title}: {x.Description}")); }
 }
 
 

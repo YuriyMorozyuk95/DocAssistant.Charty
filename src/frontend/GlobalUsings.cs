@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 global using System.Collections.Concurrent;
 global using System.Runtime.InteropServices.JavaScript;

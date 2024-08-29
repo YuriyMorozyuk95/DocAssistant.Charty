@@ -1,4 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
+
+using DocAssistant.Charty.Ai.Services;
 
 namespace MinimalApi.Extensions;
 
@@ -12,7 +14,7 @@ internal static class WebApplicationExtensions
         //api.MapPost("openai/chat", OnPostChatPromptAsync);
 
         //// Long-form chat w/ contextual history endpoint
-        //api.MapPost("chat", OnPostChatAsync);
+        api.MapPost("chat", OnPostChatAsync);
 
         //// Upload a document
         //api.MapPost("documents", OnPostDocumentAsync);
@@ -71,13 +73,13 @@ internal static class WebApplicationExtensions
     //}
 
     private static async Task<IResult> OnPostChatAsync(
-        ChatRequest request,
-        ReadRetrieveReadChatService chatService,
+        [FromBody]ChatRequest request,
+        [FromServices]IDocAssistantChatService chatService,
         CancellationToken cancellationToken)
     {
         if (request is { History.Length: > 0 })
         {
-            var response = await chatService.ReplyAsync(
+            var response = await chatService.Ask(
                 request.History, request.Overrides, cancellationToken);
 
             return TypedResults.Ok(response);

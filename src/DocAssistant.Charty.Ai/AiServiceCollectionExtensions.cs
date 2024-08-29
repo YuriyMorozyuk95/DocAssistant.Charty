@@ -7,14 +7,13 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 
 using DocAssistant.Charty.Ai.Services;
+using DocAssistant.Charty.Ai.Services.Search;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
-
-using OpenAI;
 
 namespace DocAssistant.Charty.Ai;
 
@@ -49,22 +48,22 @@ public static class AiServiceCollectionExtensions
 					//				}))
 					//	});
 
-                    var openAiClient = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint), credential);
+                    var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), credential);
 
 					return openAiClient;
 				});
 
-		services.AddSingleton(
-			sp =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-					var openAiClient = sp.GetRequiredService<AzureOpenAIClient>();
+        services.AddSingleton(
+            sp =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+                    var openAiClient = sp.GetRequiredService<OpenAIClient>();
 
-					var deployedChtGptModelName = config["AzureOpenAiChatGptDeployment"];
+                    var deployedChtGptModelName = config["AzureOpenAiChatGptDeployment"];
 
-					var kernel = Kernel.CreateBuilder()
-						.AddOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
-						.Build();
+                    var kernel = Kernel.CreateBuilder()
+                        .AddAzureOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
+                        .Build();
 
                     var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "CodeInterpreter");
                     kernel.ImportPluginFromPromptDirectory(path);
@@ -73,9 +72,9 @@ public static class AiServiceCollectionExtensions
                     //kernel.ImportPluginFromPromptDirectory(path);
 
                     return kernel;
-				});
+                });
 
-		services.AddSingleton(
+        services.AddSingleton<MemoryServerless>(
 			sp =>
 				{
 					//Creating new scope with service collection for 
@@ -114,9 +113,12 @@ public static class AiServiceCollectionExtensions
 
 
 
-        services.AddTransient<IDocumentStorageService, DocumentStorageService>();
-        services.AddTransient<IMemoryManagerService, MemoryManagerService>();
+        services.AddScoped<IDocumentStorageService, DocumentStorageService>();
+        services.AddScoped<IMemoryManagerService, MemoryManagerService>();
         services.AddScoped<IMemorySearchService, MemorySearchService>();
+        services.AddScoped<IDataBaseSearchService, DataBaseSearchService>();
+        services.AddScoped<ISqlExecutorService, SqlExecutorService>();
+        services.AddScoped<IDocAssistantChatService, DocAssistantChatService>();
 
         //services.AddTransient<IDocAssistantChatService, IDocAssistantChatService>();
     }

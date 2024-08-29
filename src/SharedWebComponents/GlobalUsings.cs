@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 global using System.Globalization;
 global using System.Net.Http.Json;

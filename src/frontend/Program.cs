@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 using ClientApp.Services;
 
@@ -11,7 +11,11 @@ builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
+    #if DEBUG
+    client.BaseAddress = new Uri("https://localhost:7181");
+    #else
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+    #endif
 });
 builder.Services.AddScoped<OpenAiPromptQueue>();
 builder.Services.AddLocalStorageServices();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 using Microsoft.Extensions.Logging;
 using Microsoft.KernelMemory;
@@ -8,7 +8,7 @@ namespace DocAssistant.Charty.Ai.Services;
 public interface IMemorySearchService
 {
     IAsyncEnumerable<SupportingContent> SearchDocument(string userPrompt, int supportingContentCount);
-    IAsyncEnumerable<string> SearchDataWarehouseSchema(string userPrompt, int supportingContentCount, string tableType, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> SearchDataBaseSchema(string userPrompt, int supportingContentCount, string tableType, CancellationToken cancellationToken = default);
 }
 
 public class MemorySearchService : IMemorySearchService
@@ -89,7 +89,7 @@ public class MemorySearchService : IMemorySearchService
         }  
     }
 
-    public async IAsyncEnumerable<string> SearchDataWarehouseSchema(string userPrompt, int supportingContentCount, string tableType, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> SearchDataBaseSchema(string userPrompt, int supportingContentCount, string tableType, CancellationToken cancellationToken = default)
     {
         SearchResult searchResult = null;
         string[] debugContent = null;

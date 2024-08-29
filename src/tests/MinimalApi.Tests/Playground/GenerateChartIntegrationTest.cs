@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 using System.Diagnostics;
 using System.Net;
@@ -43,11 +43,7 @@ public class GenerateChartIntegrationTest : IClassFixture<WebApplicationFactory<
     [Fact]
     public async Task TestAsync()
     {
-        HttpClient.DefaultProxy = new WebProxy()
-                                  {
-                                      BypassProxyOnLocal = false,
-                                      UseDefaultCredentials = true
-                                  };
+       
 
         var agent = await new AgentBuilder()
             .WithAzureOpenAIChatCompletion(_azureOpenAiEndpoint, _deploymentName, _azureApiKey)

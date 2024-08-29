@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
 
 namespace MinimalApi.Extensions;
 
 internal static class ConfigurationExtensions
 {
-    internal static string GetStorageAccountEndpoint(this IConfiguration config)
+    public static string GetStorageAccountEndpoint(this IConfiguration config)
     {
         var endpoint = config["AzureStorageAccountEndpoint"];
         ArgumentNullException.ThrowIfNullOrEmpty(endpoint);
@@ -12,7 +12,7 @@ internal static class ConfigurationExtensions
         return endpoint;
     }
 
-    internal static string ToCitationBaseUrl(this IConfiguration config)
+    public static string ToCitationBaseUrl(this IConfiguration config)
     {
         var endpoint = config.GetStorageAccountEndpoint();
 

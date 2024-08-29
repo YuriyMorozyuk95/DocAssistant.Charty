@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "Translate the user prompt to T-SQL query retrieving some data from Sql server or Data Warehouse.",
+  "completion": {
+    "max_tokens": 200,
+    "temperature": 0.1,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  },
+  "input": {
+    "parameters": [
+      {
+        "name": "input",
+        "description": "The user's request.",
+        "defaultValue": ""
+      },
+      {
+        "name": "count",
+        "description": "Count of items to be retrived",
+        "defaultValue": ""
+      },
+      {
+        "name": "dateTime",
+        "description": "Current Date and Time",
+        "defaultValue": ""
+      }
+    ]
+  }
+}

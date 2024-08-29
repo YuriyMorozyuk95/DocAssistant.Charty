@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.OpenAI" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.KernelMemory.Core" />
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Experimental.Agents" />
+    <PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\shared\Shared\Shared.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Plugins\CodeInterpreter\GeneratePython\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Plugins\CodeInterpreter\GeneratePython\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>  
+    <NoWarn>IDE1006</NoWarn>  
+  </PropertyGroup>  
+</Project>

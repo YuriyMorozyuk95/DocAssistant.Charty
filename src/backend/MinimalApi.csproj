@@ -12,20 +12,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.FormRecognizer" />
-    <PackageReference Include="Azure.AI.OpenAI" />
-    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
-    <PackageReference Include="Azure.Identity" />
-    <PackageReference Include="Azure.Search.Documents" />
-    <PackageReference Include="Azure.Storage.Blobs" />
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
-    <PackageReference Include="Microsoft.ML" />
-    <PackageReference Include="Microsoft.SemanticKernel" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
-    <PackageReference Include="PdfSharpCore" />
+    <PackageReference Include="NLog.Extensions.Logging" />
+    <PackageReference Include="NLog.Web.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
+    <PackageReference Include="PdfSharpCore" />
+    <PackageReference Include="Azure.Storage.Blobs" />
   </ItemGroup>
 
   <ItemGroup>
