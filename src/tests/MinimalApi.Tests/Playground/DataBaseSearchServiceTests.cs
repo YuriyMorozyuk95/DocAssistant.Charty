@@ -4,13 +4,12 @@ using DocAssistant.Charty.Ai.Services.Search;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-
 using Shared.Models;
 
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MinimalApi.Tests.Endpoint;
+namespace MinimalApi.Tests.Playground;
 
 public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Program>>
 {

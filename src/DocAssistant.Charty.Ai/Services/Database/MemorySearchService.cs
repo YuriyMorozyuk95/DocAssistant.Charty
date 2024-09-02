@@ -17,7 +17,9 @@ namespace DocAssistant.Charty.Ai.Services.Database;
 public interface IMemorySearchService
 {
     IAsyncEnumerable<TableSchema> SearchDataBaseSchema(string userPrompt, int supportingContentCount, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<Example> SearchExamples(string userPrompt, int supportingContentCount, CancellationToken cancellationToken = default);
     IAsyncEnumerable<TableSchema> CanGetAllSchemas();
+    IAsyncEnumerable<Example> CanGetAllExamples();
 }
 
 public class MemorySearchService : IMemorySearchService
@@ -106,6 +108,60 @@ public class MemorySearchService : IMemorySearchService
         }
     }
 
+    public async IAsyncEnumerable<Example> SearchExamples(string userPrompt, int supportingContentCount, CancellationToken cancellationToken = default)
+    {
+        SearchResult searchResult = null;
+        string[] debugContent = null;
+
+        try
+        {
+            var searchExamplesPrompt = $"Please retrieve all examples that will be helpful for the user prompt: \"{userPrompt}\"";
+            searchResult = await _memory.SearchAsync(
+                           searchExamplesPrompt,
+                           index: MemoryManagerService.ExamplesIndex,
+                           limit: supportingContentCount,
+                           cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while searching for examples in DocAssistant memory");
+            debugContent = new[] { e.ToString() };
+        }
+
+        if (debugContent != null)
+        {
+            foreach (var error in debugContent)
+            {
+                // TODO: Yield return error  
+            }
+            yield break;
+        }
+
+        if (searchResult.Results == null || !searchResult.Results.Any())
+        {
+            yield break;
+        }
+
+        foreach (var document in searchResult.Results)
+        {
+            var exampleContent = await _documentStorageService.GetDocumentContent(document.DocumentId, document.SourceName, MemoryManagerService.ExamplesIndex);
+            var tags = document.Partitions.First().Tags;
+            var server = tags.GetTagValue(TagsKeys.Server);
+            var database = tags.GetTagValue(TagsKeys.Database);
+            var table = tags.GetTagValue(TagsKeys.Table);
+            var sqlExample = tags.GetTagValue(TagsKeys.SqlExample);
+
+            yield return new Example
+            {
+                DocumentId = document.DocumentId,
+                ServerName = server,
+                DatabaseName = database,
+                TableName = table,
+                SqlExample = sqlExample,
+                UserPromptExample = exampleContent,
+            };
+        }
+    }
 
     public async IAsyncEnumerable<TableSchema> CanGetAllSchemas()
     {
@@ -167,6 +223,61 @@ public class MemorySearchService : IMemorySearchService
                 TableName = tableName,
                 Schema = schema,
                 ConnectionString = connectionString,
+            };
+        }
+    }
+
+    public async IAsyncEnumerable<Example> CanGetAllExamples()
+    {
+        var searchClient = new SearchClient(
+            new Uri(_azureAiSearchEndpoint),
+            MemoryManagerService.ExamplesIndex,
+            _tokenCredential);
+
+        var options = new SearchOptions
+        {
+            Size = 1000,
+            Select = { "*" }
+        };
+
+        SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", options);
+
+        await foreach (SearchResult<SearchDocument> result in results.GetResultsAsync())
+        {
+            string serverName = null;
+            string databaseName = null;
+            string tableName = null;
+            string userPromptExample = null;
+            string sqlExample = null;
+
+            if (result.Document.TryGetValue("tags", out var tags))
+            {
+                var tagsArray = ((object[])tags).Skip(6).ToArray();
+                serverName = tagsArray[0].ToString().Replace($"{TagsKeys.Server}:", string.Empty);
+                databaseName = tagsArray[1].ToString().Replace($"{TagsKeys.Database}:", string.Empty);
+                tableName = tagsArray[2].ToString().Replace($"{TagsKeys.Table}:", string.Empty);
+                sqlExample = tagsArray[3].ToString().Replace($"{TagsKeys.SqlExample}:", string.Empty);
+            }
+
+            if (result.Document.TryGetValue("payload", out var payload))
+            {
+                using JsonDocument document = JsonDocument.Parse(payload.ToString());
+                JsonElement root = document.RootElement;
+
+                if (root.TryGetProperty("text", out JsonElement textElement))
+                {
+                    userPromptExample = textElement.GetString();
+                }
+            }
+
+            yield return new Example
+            {
+                DocumentId = result.Document["id"].ToString(),
+                ServerName = serverName,
+                DatabaseName = databaseName,
+                TableName = tableName,
+                SqlExample = sqlExample,
+                UserPromptExample = userPromptExample,
             };
         }
     }

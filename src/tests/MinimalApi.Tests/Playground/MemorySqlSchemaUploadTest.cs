@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Shared.Models;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,6 +29,43 @@ namespace MinimalApi.Tests.Playground
             _memorySearchService = scope.ServiceProvider.GetRequiredService<IMemorySearchService>();
 
             var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        }
+
+        [Fact]  
+        public async Task CanGetAllExamples()  
+        {  
+            await foreach (var example in _memorySearchService.CanGetAllExamples())  
+            {  
+                _output.WriteLine($"ServerName: {example.ServerName}");  
+                _output.WriteLine($"DatabaseName: {example.DatabaseName}");  
+                _output.WriteLine($"TableName: {example.TableName}");  
+                _output.WriteLine($"SQL Example: {example.SqlExample}");  
+                _output.WriteLine($"User Prompt Example: {example.UserPromptExample}");  
+            }  
+        }
+
+        [Fact]  
+        public async Task UploadExampleToMemoryTest()  
+        {  
+            var example = new Example  
+                          {  
+                              ServerName = "test-server",  
+                              DatabaseName = "test-database",  
+                              TableName = "test-table",  
+                              SqlExample = "SELECT * FROM test-table",  
+                              UserPromptExample = "Get all records from test-table"  
+                          };  
+  
+            _output.WriteLine($"Uploading Example: {example.SqlExample}");  
+            var documentId = await _memoryManagerService.UploadExampleToMemory(example);  
+            Assert.NotNull(documentId);  
+            _output.WriteLine($"Uploaded Example DocumentId: {documentId}");  
+        }  
+  
+        [Fact]  
+        public async Task CleanUpExamples()  
+        {  
+            await _memoryManagerService.RemoveExampleSchemaIndex();  
         }
 
         [Fact]

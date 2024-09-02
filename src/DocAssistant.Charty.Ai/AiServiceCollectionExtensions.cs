@@ -110,7 +110,7 @@ public static class AiServiceCollectionExtensions
 				});
 
         services.AddScoped<IAzureSqlSchemaGenerator, AzureSqlSchemaGenerator>();
-
+        services.AddScoped<ISqlExampleService, SqlExampleService>();
 
         services.AddScoped<IDocumentStorageService, DocumentStorageService>();
         services.AddScoped<IMemoryManagerService, MemoryManagerService>();

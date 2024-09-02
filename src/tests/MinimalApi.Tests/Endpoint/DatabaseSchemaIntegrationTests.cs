@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 
+using Shared.Models;
+
 using SharedWebComponents.Services;
 
 using Xunit;
@@ -17,6 +19,38 @@ public class DatabaseSchemaIntegrationTests : IClassFixture<WebApplicationFactor
         _testOutputHelper = testOutputHelper;
         var httpClient = factory.CreateClient();
         _client = new ApiClient(httpClient);
+    }
+
+    [Fact]  
+    public async Task Post_UploadExample_ReturnsDocumentId()  
+    {  
+        // Arrange  
+        var example = new Example  
+                      {  
+                          ServerName = "test-server",  
+                          DatabaseName = "test-database",  
+                          TableName = "test-table",  
+                          SqlExample = "SELECT * FROM test-table",  
+                          UserPromptExample = "Get all records from test-table"  
+                      };  
+        var cancellationToken = CancellationToken.None;  
+  
+        // Act  
+        var documentId = await _client.UploadExampleAsync(example, cancellationToken);  
+  
+        // Assert  
+        Assert.NotNull(documentId);  
+        _testOutputHelper.WriteLine($"Uploaded Example DocumentId: {documentId}");  
+    }  
+  
+    [Fact]  
+    public async Task Get_AllExamples_ReturnsExpectedExamples()  
+    {  
+        var cancellationToken = CancellationToken.None;  
+        await foreach (var example in _client.GetAllExamplesAsync(cancellationToken))  
+        {  
+            _testOutputHelper.WriteLine($"Example: {example.UserPromptExample}, SQL: {example.SqlExample}, Table: {example.TableName}, Database: {example.DatabaseName}, Server: {example.ServerName}");  
+        }  
     }
 
     [Fact]

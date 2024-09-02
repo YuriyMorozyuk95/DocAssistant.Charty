@@ -1,6 +1,7 @@
 ﻿
 
 using System.Diagnostics;
+using System.Net;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -36,36 +37,68 @@ public class GenerateChartIntegrationTest : IClassFixture<WebApplicationFactory<
         _deploymentName = "hack-gpt4o";
 
         _fileService = new OpenAIFileService(new Uri(_azureOpenAiEndpoint), apiKey: _azureApiKey);
-
+        HttpClient.DefaultProxy = new WebProxy()
+                                  {
+                                      BypassProxyOnLocal = false,
+                                      UseDefaultCredentials = true
+                                  };
     }
 
     [Fact]
     public async Task TestAsync()
     {
-       
-
         var agent = await new AgentBuilder()
             .WithAzureOpenAIChatCompletion(_azureOpenAiEndpoint, _deploymentName, _azureApiKey)
             .WithCodeInterpreter()
             .BuildAsync();
-
         try
         {
+
+            var prompt = "List all customers' names and their emails.";
+            var table ="""
+                | CustomerName | Email |    
+                | --- | --- |    
+                | John Doe | john.doe@example.com |    
+                | Jane Smith | jane.smith@example.com |    
+                | Alice Johnson | alice.johnson@example.com |    
+                | Liam Scott | liam.scott@example.com |    
+                | Emma Green | emma.green@example.com |    
+                | Noah Harris | noah.harris@example.com |    
+                | Ava Thompson | ava.thompson@example.com |    
+                | William Martinez | william.martinez@example.com |    
+                | Sophia Robinson | sophia.robinson@example.com |    
+                | James Clark | james.clark@example.com |    
+                | Mia Rodriguez | mia.rodriguez@example.com |    
+                | Benjamin Lee | benjamin.lee@example.com |    
+                | Isabella Walker | isabella.walker@example.com |    
+                | Lucas Hall | lucas.hall@example.com |    
+                | Charlotte Allen | charlotte.allen@example.com |    
+                | Henry Young | henry.young@example.com |    
+                | Amelia King | amelia.king@example.com |    
+                | Alexander Wright | alexander.wright@example.com |    
+                | Evelyn Scott | evelyn.scott@example.com |    
+                | Elijah Adams | elijah.adams@example.com |    
+                | Abigail Baker | abigail.baker@example.com |    
+                | Oliver Nelson | oliver.nelson@example.com |    
+                | Emily Carter | emily.carter@example.com |    
+                | Jacob Mitchell | jacob.mitchell@example.com |    
+                | Harper Perez | harper.perez@example.com |    
+                | Michael Roberts | michael.roberts@example.com |    
+                | Ella Turner | ella.turner@example.com |    
+                | Daniel Phillips | daniel.phillips@example.com |    
+                | Grace Campbell | grace.campbell@example.com |    
+                | Matthew Parker | matthew.parker@example.com |    
+                | Chloe Evans | chloe.evans@example.com |    
+                | Sebastian Edwards | sebastian.edwards@example.com |    
+                | Avery Collins | avery.collins@example.com |
+                """;
+
             var thread = await agent.NewThreadAsync();
 
             await InvokeAgentAsync(
                 agent,
                 thread,
-                "1-first", @"
-Display this data using a bar-chart with no summation:
-
-Banding  Brown Pink Yellow  Sum
-X00000   339   433     126  898
-X00300    48   421     222  691
-X12345    16   395     352  763
-Others    23   373     156  552
-Sum      426  1622     856 2904
-");
+                "1-first", $"Please create chart based on user prompt: {prompt} and  on data: {table}");
 
             await InvokeAgentAsync(agent, thread, "2-colors", "Can you regenerate this same chart using the category names as the bar colors?");
             await InvokeAgentAsync(agent, thread, "3-line", "Can you regenerate this as a line chart?");

@@ -13,18 +13,20 @@ public interface IMemoryManagerService
         TableSchema tableSchema,
         CancellationToken cancellationToken = default);
 
+
+    Task<string> UploadExampleToMemory(
+        Example example,
+        CancellationToken cancellationToken = default);
+
     Task RemoveDataBaseSchemaIndex();
 
-    //TODO add upload sql example to memory
-    //Task<TableSchema> UploadDataBaseSchemaToMemory(
-    //    TableSchema tableSchema,
-    //    CancellationToken cancellationToken = default);
-
+    Task RemoveExampleSchemaIndex();
 }
 
 public class MemoryManagerService : IMemoryManagerService
 {
     public const string DataBaseSchemaIndex = "database-schema-index";
+    public const string ExamplesIndex = "examples-index";
 
     private readonly string _containerName;
 
@@ -35,6 +37,7 @@ public class MemoryManagerService : IMemoryManagerService
     public MemoryManagerService(
         MemoryServerless memory,
         IConfiguration configuration,
+        ISqlExampleService sqlExampleService,
         BlobServiceClient blobServiceClient)
     {
         _memory = memory;
@@ -50,6 +53,7 @@ public class MemoryManagerService : IMemoryManagerService
 
         var id = Guid.NewGuid().ToString();
 
+        //TODO make tags optionals
         var tag = new TagCollection
             {
                 { TagsKeys.Server, tableSchema.ServerName },
@@ -75,6 +79,38 @@ public class MemoryManagerService : IMemoryManagerService
         return tableSchema;
     }
 
+    public async Task<string> UploadExampleToMemory(
+        Example example,
+        CancellationToken cancellationToken = default)
+    {
+        await CreateContainerIfNotExistAsync();
+
+        var id = Guid.NewGuid().ToString();
+
+        var tag = new TagCollection
+                  {
+                      { TagsKeys.Server, example.ServerName },
+                      { TagsKeys.Database, example.DatabaseName },
+                      { TagsKeys.Table, example.TableName },
+                      { TagsKeys.SqlExample, example.SqlExample },
+                  };
+
+        await _memory.ImportTextAsync(example.UserPromptExample,
+                                      documentId: id,
+                                      tags: tag,
+                                      steps: new[]
+                                             {
+                                                 Constants.PipelineStepsExtract,
+                                                 Constants.PipelineStepsPartition,
+                                                 "gen_embeddings_parallel",
+                                                 Constants.PipelineStepsSaveRecords
+                                             },
+                                      index: ExamplesIndex,
+                                      cancellationToken: cancellationToken);
+
+        return id;
+    }
+
 
     public async Task CreateContainerIfNotExistAsync()
     {
@@ -88,5 +124,10 @@ public class MemoryManagerService : IMemoryManagerService
     public async Task RemoveDataBaseSchemaIndex()
     {
         await _memory.DeleteIndexAsync(DataBaseSchemaIndex);
+    }
+
+    public async Task RemoveExampleSchemaIndex()
+    {
+        await _memory.DeleteIndexAsync(ExamplesIndex);
     }
 }

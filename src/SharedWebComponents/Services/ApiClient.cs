@@ -4,6 +4,31 @@ namespace SharedWebComponents.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
+    public async Task<string?> UploadExampleAsync(Example example, CancellationToken cancellationToken)  
+    {  
+        var response = await httpClient.PostAsJsonAsync("api/upload-example", example, SerializerOptions.Default, cancellationToken);  
+        response.EnsureSuccessStatusCode();  
+        var result = await response.Content.ReadFromJsonAsync<UploadExampleResponse>();  
+        return result?.DocumentId;  
+    }  
+  
+    public async IAsyncEnumerable<Example> GetAllExamplesAsync([EnumeratorCancellation] CancellationToken cancellationToken)  
+    {  
+        var response = await httpClient.GetAsync("api/get-all-examples", cancellationToken);  
+        response.EnsureSuccessStatusCode();  
+        var options = SerializerOptions.Default;  
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);  
+        await foreach (var example in JsonSerializer.DeserializeAsyncEnumerable<Example>(stream, options, cancellationToken))  
+        {  
+            if (example is null)  
+            {  
+                continue;  
+            }  
+            await Task.Delay(1, cancellationToken);  
+            yield return example;  
+        }  
+    }
+
     public async Task<ImageResponse?> RequestImageAsync(PromptRequest request)
     {
         var response = await httpClient.PostAsJsonAsync(
