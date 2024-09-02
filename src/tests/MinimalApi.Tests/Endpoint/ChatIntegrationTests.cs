@@ -30,7 +30,7 @@ public class ChatIntegrationTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange  
         var history = new ChatMessage[]  
                       {  
-                          new ChatMessage("user", "Could you remove pet in store with id 11?")  
+                          new ChatMessage("user", "List all customers' names and their emails.")  
                       };  
         var request = new ChatRequest(history, null);  
   
@@ -52,4 +52,4 @@ public class ChatIntegrationTests : IClassFixture<WebApplicationFactory<Program>
             _testOutputHelper.WriteLine($"Content: {choice.Message.Content}");  
         }  
     }  
-} 
+}

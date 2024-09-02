@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="NLog.Extensions.Logging" />
     <PackageReference Include="NLog.Web.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore" />

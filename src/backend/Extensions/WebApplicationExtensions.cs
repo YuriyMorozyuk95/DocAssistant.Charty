@@ -1,6 +1,7 @@
 ﻿
 
 using DocAssistant.Charty.Ai.Services;
+using DocAssistant.Charty.Ai.Services.Database;
 
 namespace MinimalApi.Extensions;
 
@@ -16,8 +17,9 @@ internal static class WebApplicationExtensions
         //// Long-form chat w/ contextual history endpoint
         api.MapPost("chat", OnPostChatAsync);
 
-        //// Upload a document
-        //api.MapPost("documents", OnPostDocumentAsync);
+        api.MapPost("upload-database-schema", OnPostUploadDatabaseSchemaAsync);
+
+        api.MapGet("get-all-database-schema", OnGetAllDatabaseSchemaAsync);
 
         //// Get all documents
         //api.MapGet("documents", OnGetDocumentsAsync);
@@ -38,40 +40,6 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(enableLogout);
     }
 
-    //private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(
-    //    PromptRequest prompt,
-    //    AzureOpenAIClient client,
-    //    IConfiguration config,
-    //    [EnumeratorCancellation] CancellationToken cancellationToken)
-    //{
-    //    var deploymentId = config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
-    //    var response = await client.GetChatCompletionsStreamingAsync(
-    //        new ChatCompletionsOptions
-    //        {
-    //            DeploymentName = deploymentId,
-    //            Messages =
-    //            {
-    //                new ChatRequestSystemMessage("""
-    //                    You're an AI assistant for developers, helping them write code more efficiently.
-    //                    You're name is **Blazor 📎 Clippy** and you're an expert Blazor developer.
-    //                    You're also an expert in ASP.NET Core, C#, TypeScript, and even JavaScript.
-    //                    You will always reply with a Markdown formatted response.
-    //                    """),
-    //                new ChatRequestUserMessage("What's your name?"),
-    //                new ChatRequestAssistantMessage("Hi, my name is **Blazor 📎 Clippy**! Nice to meet you."),
-    //                new ChatRequestUserMessage(prompt.Prompt)
-    //            }
-    //        }, cancellationToken);
-
-    //    await foreach (var choice in response.WithCancellation(cancellationToken))
-    //    {
-    //        if (choice.ContentUpdate is { Length: > 0 })
-    //        {
-    //            yield return new ChatChunkResponse(choice.ContentUpdate.Length, choice.ContentUpdate);
-    //        }
-    //    }
-    //}
-
     private static async Task<IResult> OnPostChatAsync(
         [FromBody]ChatRequest request,
         [FromServices]IDocAssistantChatService chatService,
@@ -88,20 +56,6 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async Task<IResult> OnPostDocumentAsync(
-        [FromForm] IFormFileCollection files,
-        [FromServices] AzureBlobStorageService service,
-        [FromServices] ILogger<AzureBlobStorageService> logger,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Upload documents");
-
-        var response = await service.UploadFilesAsync(files, cancellationToken);
-
-        logger.LogInformation("Upload documents: {x}", response);
-
-        return TypedResults.Ok(response);
-    }
 
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
         BlobContainerClient client,
@@ -142,21 +96,37 @@ internal static class WebApplicationExtensions
         }
     }
 
-    //private static async Task<IResult> OnPostImagePromptAsync(
-    //    PromptRequest prompt,
-    //    AzureOpenAIClient client,
-    //    IConfiguration config,
-    //    CancellationToken cancellationToken)
-    //{
-    //    var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
-    //    {
-    //        Prompt = prompt.Prompt,
-    //    },
-    //    cancellationToken);
+    private static async IAsyncEnumerable<string> OnPostUploadDatabaseSchemaAsync(  
+        [FromBody] UploadDatabaseSchemaRequest request,  
+        [FromServices] IAzureSqlSchemaGenerator azureSqlSchemaGenerator,  
+        [FromServices] IMemoryManagerService memoryManagerService,  
+        [EnumeratorCancellation] CancellationToken cancellationToken)  
+    {  
+        var tables = azureSqlSchemaGenerator.GetTableNamesDdlSchemas(request.ConnectionString);
 
-    //    var imageUrls = result.Value.Data.Select(i => i.Url).ToList();
-    //    var response = new ImageResponse(result.Value.Created, imageUrls);
+        foreach (var table in tables)  
+        {  
+            yield return $"Uploading Table: {table.TableName}";  
+            var uploadedTable = await memoryManagerService.UploadTableSchemaToMemory(table, cancellationToken);
 
-    //    return TypedResults.Ok(response);
-    //}
+            if (uploadedTable.DocumentId != null)  
+            {  
+                yield return $"Uploaded DocumentId: {uploadedTable.DocumentId}";  
+            }  
+            else  
+            {  
+                yield return $"Failed to upload table: {table.TableName}";  
+            }  
+        }  
+    }
+
+    private static async IAsyncEnumerable<TableSchema> OnGetAllDatabaseSchemaAsync(  
+        [FromServices] IMemorySearchService memorySearchService,  
+        [EnumeratorCancellation] CancellationToken cancellationToken)  
+    {  
+        await foreach (var schema in memorySearchService.CanGetAllSchemas().WithCancellation(cancellationToken))  
+        {  
+            yield return schema;  
+        }  
+    }
 }

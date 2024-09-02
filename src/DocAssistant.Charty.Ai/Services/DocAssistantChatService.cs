@@ -18,6 +18,7 @@ using Microsoft.SemanticKernel;
 using DocAssistant.Charty.Ai.Services.Search;
 
 using Shared.Models;
+using DocAssistant.Charty.Ai.Services.Database;
 
 namespace DocAssistant.Charty.Ai.Services;
 
@@ -130,7 +131,7 @@ public class DocAssistantChatService : IDocAssistantChatService
 
             //var response = ApproachResponseFactory.FromServerException(e, supportingContentList, tokensSpent, searchTime, completionTime);
 
-            throw new Exception("Error while generating answer",  e);
+            throw new Exception("Error while generating answer", e);
         }
     }
 
@@ -138,7 +139,9 @@ public class DocAssistantChatService : IDocAssistantChatService
     {
         List<SupportingContent> supportingContentList = [];
 
-        //TODO implement database search
+        var supportingContents = await _dataBaseSearchService.Search(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
+
+        supportingContentList.AddRange(supportingContents);
 
         return supportingContentList;
     }
@@ -211,16 +214,28 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private string GetDocumentContents(ICollection<SupportingContent> documentContentList)
     {
-        string documentContents =
-            // Join document contents or set as "no source available" if no documents found  
-            documentContentList.Count == 0 ? "no source available." : string.Join("\r", documentContentList.Where(x => !x.IsDebug).Select(x =>
-            {
-                var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine("Title: " + x.Title);
-                stringBuilder.AppendLine("Url: " + x.OriginUri);
-                stringBuilder.AppendLine("Content: " + x.Content);
-                return stringBuilder.ToString();
-            }));
+        string documentContents
+            ;
+        if (documentContentList.Count == 0)
+        {
+            documentContents = "no source available.";
+        }
+        else
+        {
+            documentContents = string.Join(
+                "\r",
+                documentContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult)
+                    .Select(
+                        x =>
+                        {
+                            var stringBuilder = new StringBuilder();
+                            stringBuilder.AppendLine(x.Title);
+                            stringBuilder.AppendLine(x.Content);
+                            stringBuilder.AppendLine();
+
+                            return stringBuilder.ToString();
+                        }));
+        }
 
         return documentContents;
     }

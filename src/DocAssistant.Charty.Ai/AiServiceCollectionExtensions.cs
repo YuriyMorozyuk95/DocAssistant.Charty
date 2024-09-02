@@ -7,6 +7,7 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 
 using DocAssistant.Charty.Ai.Services;
+using DocAssistant.Charty.Ai.Services.Database;
 using DocAssistant.Charty.Ai.Services.Search;
 
 using Microsoft.Extensions.Configuration;
@@ -65,11 +66,8 @@ public static class AiServiceCollectionExtensions
                         .AddAzureOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
                         .Build();
 
-                    var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "CodeInterpreter");
+                    var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "DatabasePlugin");
                     kernel.ImportPluginFromPromptDirectory(path);
-
-                    //path = Path.Combine(AppContext.BaseDirectory, "Plugins", "DatabasePlugin");
-                    //kernel.ImportPluginFromPromptDirectory(path);
 
                     return kernel;
                 });
@@ -111,6 +109,7 @@ public static class AiServiceCollectionExtensions
 					return memory;
 				});
 
+        services.AddScoped<IAzureSqlSchemaGenerator, AzureSqlSchemaGenerator>();
 
 
         services.AddScoped<IDocumentStorageService, DocumentStorageService>();

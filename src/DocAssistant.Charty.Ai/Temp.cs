@@ -1,22 +1,5 @@
 ﻿namespace DocAssistant.Charty.Ai;
 
-public static class TagsKeys
-{
-    public const string File = "file";
-
-       public const string DocumentId = "documentId";
-
-    public const string BlobUrl = "blobUrl";
-
-    public const string IsOriginFile = "isOriginFile";
-
-    public const string Endpoint = "endpoint";
-
-    public const string TableType = "tableType";
-    public const string Dim = "dim";
-    public const string Fact = "fact";
-}
-
 public static class GlobalStatus
 {
     public static string LastIndexErrorMessage { get; set; }
@@ -48,4 +31,13 @@ public class SupportingContent
 
     public int Rank {get;set;}
 
+    public SupportingContentType SupportingContentType { get;set;}
+
+}
+
+public enum SupportingContentType
+{
+    Schema = 0,
+    SqlQuery = 1,
+    TableResult = 2,
 }

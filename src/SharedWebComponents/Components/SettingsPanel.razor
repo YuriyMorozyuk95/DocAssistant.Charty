@@ -1,55 +1,35 @@
-﻿<MudDrawer @bind-Open="@Open" Anchor="@Anchor.End" Elevation="5"
-    Variant="@DrawerVariant.Temporary" Width="25rem">
+﻿
+<MudDrawer @bind-Open="@Open" Anchor="@Anchor.End" Elevation="5"
+           Variant="@DrawerVariant.Temporary" Width="25rem">
     <MudDrawerHeader>
-        <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" 
+        <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Medium"
                  Color="Color.Tertiary" Class="ma-1" />
         <MudText Typo="Typo.h5" Class="pl-2">
             Configure Answer Generation
         </MudText>
     </MudDrawerHeader>
-    <div class="pa-6">
-        <MudTextField T="string" Lines="5" Variant="Variant.Outlined"
-                      Label="Override prompt template" Placeholder="Override prompt template" Class="pa-2"
-                      @bind-Value="Settings.Overrides.PromptTemplate" Clearable="true" />
-                      
-        <MudNumericField @bind-Value="Settings.Overrides.Top" Class="pa-2"
-                         Placeholder="Retrieve this many documents from search"
-                         Label="Retrieve this many documents from search" HideSpinButtons="true"
-                         aria-label="Number input for the number of documents to search."
-                         Variant="Variant.Outlined" Min="1" Max="50" />
+    <MudExpansionPanels Style="margin: 10px;">
 
-        <MudTextField T="string" Variant="Variant.Outlined"
-                      Label="Exclude category" Placeholder="Exclude category" Class="pa-2"
-                      @bind-Value="Settings.Overrides.ExcludeCategory" Clearable="true" />
+        <MudExpansionPanel Text="DataWarehouse Search Setting">
+            <MudForm>
+                <MudCheckBox @bind-Checked="@Settings.Overrides.DataBaseSearchConfig.IsEnabled" Size="Size.Large"
+                             Color="Color.Primary" Label="Enable Database Search" />
 
-        <MudCheckBox @bind-Checked="@Settings.Overrides.SemanticRanker" Size="Size.Large"
-                     Color="Color.Primary" Label="Use semantic ranker for retrieval" />
+                <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.ResultsNumberLimit" Label="Count DataWarehouse search results" Variant="Variant.Outlined" />
+                <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.TableCount" Label="Table Count" Variant="Variant.Outlined" />
+                <MudTextField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.Query" Label="Query" Variant="Variant.Outlined" />
+            </MudForm>
+        </MudExpansionPanel>
 
-        <MudText Typo="Typo.subtitle1">Retrieval Mode</MudText>
-        <MudRadioGroup Required="true" @bind-SelectedOption="@Settings.Overrides.RetrievalMode" Class="pa-2">
-            <MudRadio T="RetrievalMode" Option="@RetrievalMode.Text" Color="Color.Primary">
-                Text
-            </MudRadio>
-            <MudRadio T="RetrievalMode" Option="@RetrievalMode.Hybrid" Color="Color.Primary">
-                Hybrid
-            </MudRadio>
-            <MudRadio T="RetrievalMode" Option="@RetrievalMode.Vector" Color="Color.Primary">
-                Vector
-            </MudRadio>
-        </MudRadioGroup>
-        <MudCheckBox @bind-Checked="@Settings.Overrides.SemanticCaptions" Size="Size.Large"
-                     Color="Color.Primary" 
-                     Label="Use query-contrextual summaries instead of whole documents" />
+        <MudDivider DividerType="DividerType.Middle" Class="my-6" />
 
-        <MudCheckBox @bind-Checked="@Settings.Overrides.SuggestFollowupQuestions" Size="Size.Large"
-                     Color="Color.Primary" Label="Suggest follow-up questions"
-                     aria-label="Suggest follow-up questions checkbox." />
-    </div>
+    </MudExpansionPanels>
+
     <div class="d-flex align-content-end flex-wrap flex-grow-1 pa-6">
         <MudButton Variant="Variant.Filled" Color="Color.Secondary"
-            OnClick="@(_ => Open = Open is false)" Size="Size.Large"
-            StartIcon="@Icons.Material.Filled.Close"
-            aria-label="Close setting panel button.">
+                   OnClick="@(_ => Open = !Open)" Size="Size.Large"
+                   StartIcon="@Icons.Material.Filled.Close"
+                   aria-label="Close setting panel button.">
             Close
         </MudButton>
     </div>

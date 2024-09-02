@@ -1,66 +1,64 @@
-# SK Prompt Template for T-SQL Query Generation  
-  
-## Description  
-Translate the user prompt to T-SQL query retrieving some data from Data Warehouse.  
-  
 ## Instructions  
 Using the user's prompt, generate a T-SQL query that accomplishes the described task. Ensure the query is syntactically correct and follows best practices.  
   
 ## Tags  
-<Context>You are tasked with translating a user's natural language prompt into a T-SQL query. T-SQL is a procedural language used by SQL Server for data manipulation and querying.</Context>  
+<Context>You are tasked with translating a user's natural language prompt into a T-SQL query. T-SQL is a procedural language used by SQL Server for data manipulation and querying. Just write sql query without description.</Context>  
 <TSQLQueryRules>
+    1. Use only tables in <DataBaseDDLSchema> tag
     1. Ensure the query is syntactically correct. 
     2. Use square brackets for column names, as some columns might be reserved. 
-    3. Use schemas for tables, such as [fact].[Invoices]. 
     4. Use JOINs between fact and dimension tables. 
     5. Use aggregate functions like SUM or COUNT where appropriate. 
     6. Select only TOP {{$count}} rows. 
     7. Consider the current date as {{$dateTime}}.
 </TSQLQueryRules>  
-<UsefulFacts>
-You may or may not need these depending on the user query:
-</UsefulFacts> 
 
-<UsefulVariables>
-- User's input prompt -> {{$input}} 
-- Current date -> {{$dateTime}} 
-- Database schema -> {{$schema}}
-</UsefulVariables>  
-  
+<DataBaseDDLSchema>
+{{$schema}}
+</DataBaseDDLSchema>
+
 ## Example Prompts and Responses  
   
 <Examples>  
-<Example>  
-<UserPrompt>  
-
-</UserPrompt>  
-<AssistantResponse>  
-<TSQLQuery>  
- 
-</TSQLQuery>  
-</AssistantResponse>  
-</Example>  
-  
-<Example>  
-<UserPrompt>  
-
-</UserPrompt>  
-<AssistantResponse>  
-<TSQLQuery>  
-
-</TSQLQuery>  
-</AssistantResponse>  
-</Example>  
+    <Example>  
+        <UserPrompt>  
+            List all customers' names and their emails.
+        </UserPrompt>  
+        <AssistantResponse>  
+            <TSQLQuery>  
+                SELECT CustomerName, Email  
+                FROM Customers;
+            </TSQLQuery>  
+        </AssistantResponse>  
+    </Example>
+    
+    <Example>  
+        <UserPrompt>  
+            Show the products supplied by supplier with ID 3.
+        </UserPrompt>  
+        <AssistantResponse>  
+            <TSQLQuery>  
+                SELECT p.ProductName  
+                FROM Products p  
+                JOIN ProductSuppliers ps ON p.ProductID = ps.ProductID  
+                WHERE ps.SupplierID = 3;
+            </TSQLQuery>  
+        </AssistantResponse>  
+    </Example>
+      
+    <Example>  
+        <UserPrompt>  
+           Get the total quantity of products ordered in order ID 15.
+        </UserPrompt>  
+        <AssistantResponse>  
+            <TSQLQuery>  
+                SELECT SUM(Quantity) AS TotalQuantity  
+                FROM OrderDetails  
+                WHERE OrderID = 15;
+            </TSQLQuery>  
+        </AssistantResponse>  
+    </Example> 
 </Examples>  
-  
-<FinalInstructions>  
-To translate this prompt into a T-SQL query, follow these guidelines:  
-1. Identify the key elements in the user's prompt, such as tables, columns, conditions, and aggregations.  
-2. Map these elements to the appropriate T-SQL syntax.  
-3. Write your T-SQL query inside <TSQLQuery> tags.  
-4. After providing the T-SQL query, explain your translation process inside <Scratchpad> tags. Describe how you interpreted the user's prompt and how you mapped it to T-SQL syntax.  
-5. Remember to use proper T-SQL syntax and structure. If the user's prompt is ambiguous or lacks necessary information to create a complete T-SQL query, make reasonable assumptions and mention them in your explanation.  
-</FinalInstructions>  
   
 ---  
   

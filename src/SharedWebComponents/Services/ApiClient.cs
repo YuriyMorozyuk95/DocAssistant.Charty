@@ -1,7 +1,5 @@
 ﻿
 
-using System.Net.Http.Headers;
-
 namespace SharedWebComponents.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
@@ -24,69 +22,46 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<bool>();
     }
 
-    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
-        IReadOnlyList<IBrowserFile> files,
-        long maxAllowedSize,
-        string cookie)
+    public async IAsyncEnumerable<string> UploadDatabaseSchemaAsync(
+        string connectionString,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        try
+        var request = new UploadDatabaseSchemaRequest { ConnectionString = connectionString };
+        var response = await httpClient.PostAsJsonAsync("api/upload-database-schema", request, SerializerOptions.Default, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var options = SerializerOptions.Default;
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await foreach (var logMessage in JsonSerializer.DeserializeAsyncEnumerable<string>(stream, options, cancellationToken))
         {
-            using var content = new MultipartFormDataContent();
-
-            foreach (var file in files)
+            if (logMessage is null)
             {
-                // max allow size: 10mb
-                var maxSize = maxAllowedSize * 1024 * 1024;
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                var fileContent = new StreamContent(file.OpenReadStream(maxSize));
-#pragma warning restore CA2000 // Dispose objects before losing scope
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-
-                content.Add(fileContent, file.Name, file.Name);
+                continue;
             }
 
-            // set cookie
-            content.Headers.Add("X-CSRF-TOKEN-FORM", cookie);
-            content.Headers.Add("X-CSRF-TOKEN-HEADER", cookie);
-
-            var response = await httpClient.PostAsync("api/documents", content);
-
-            response.EnsureSuccessStatusCode();
-
-            var result =
-                await response.Content.ReadFromJsonAsync<UploadDocumentsResponse>();
-
-            return result
-                ?? UploadDocumentsResponse.FromError(
-                    "Unable to upload files, unknown error.");
-        }
-        catch (Exception ex)
-        {
-            return UploadDocumentsResponse.FromError(ex.ToString());
+            await Task.Delay(1, cancellationToken);
+            yield return logMessage;
         }
     }
 
-    public async IAsyncEnumerable<DocumentResponse> GetDocumentsAsync(
+    public async IAsyncEnumerable<TableSchema> GetAllDatabaseSchemasAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/documents", cancellationToken);
+        var response = await httpClient.GetAsync("api/get-all-database-schema", cancellationToken);
+        response.EnsureSuccessStatusCode();
 
-        if (response.IsSuccessStatusCode)
+        var options = SerializerOptions.Default;
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await foreach (var schema in
+                       JsonSerializer.DeserializeAsyncEnumerable<TableSchema>(stream, options, cancellationToken))
         {
-            var options = SerializerOptions.Default;
-
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-            await foreach (var document in
-                JsonSerializer.DeserializeAsyncEnumerable<DocumentResponse>(stream, options, cancellationToken))
+            if (schema is null)
             {
-                if (document is null)
-                {
-                    continue;
-                }
-
-                yield return document;
+                continue;
             }
+
+            await Task.Delay(1, cancellationToken);
+            yield return schema;
         }
     }
 

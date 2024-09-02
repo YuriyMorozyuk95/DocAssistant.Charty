@@ -1,7 +1,6 @@
 ﻿
 
 using System.Diagnostics;
-using System.Net;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.SemanticKernel.Connectors.OpenAI;

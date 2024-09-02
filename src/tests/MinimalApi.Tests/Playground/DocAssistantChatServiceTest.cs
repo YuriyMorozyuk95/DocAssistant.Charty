@@ -1,14 +1,16 @@
 ﻿using DocAssistant.Charty.Ai.Services;
 
-using Microsoft.AspNetCore.Mvc.Testing;  
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel;  
-using MinimalApi;  
+using Microsoft.SemanticKernel;
+
 using Shared.Models;
 
-using Xunit;  
-using Xunit.Abstractions;  
-  
+using Xunit;
+using Xunit.Abstractions;
+
+namespace MinimalApi.Tests.Playground;
+
 public class DocAssistantChatServiceTest : IClassFixture<WebApplicationFactory<Program>>  
 {  
     private readonly DocAssistantChatService _docAssistantChatService;  
@@ -18,7 +20,6 @@ public class DocAssistantChatServiceTest : IClassFixture<WebApplicationFactory<P
     {  
         _testOutputHelper = testOutputHelper;  
         using var scope = factory.Services.CreateScope();  
-        var a = scope.ServiceProvider.GetService<Kernel>();  
         _docAssistantChatService = scope.ServiceProvider.GetService<IDocAssistantChatService>() as DocAssistantChatService;  
     }  
   
@@ -27,9 +28,9 @@ public class DocAssistantChatServiceTest : IClassFixture<WebApplicationFactory<P
     {  
         // Arrange  
         var history = new[]  
-        {  
-            new ChatMessage("user", "What is the weather like today?"),  
-        };  
+                      {  
+                          new ChatMessage("user", "List all customers' names and their emails."),  
+                      };  
   
         var overrides = new RequestOverrides();  
         var cancellationToken = CancellationToken.None;  
