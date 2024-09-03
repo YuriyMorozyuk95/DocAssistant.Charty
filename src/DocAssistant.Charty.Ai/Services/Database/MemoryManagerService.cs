@@ -89,12 +89,22 @@ public class MemoryManagerService : IMemoryManagerService
 
         var tag = new TagCollection
                   {
-                      { TagsKeys.Server, example.ServerName },
-                      { TagsKeys.Database, example.DatabaseName },
-                      { TagsKeys.Table, example.TableName },
                       { TagsKeys.SqlExample, example.SqlExample },
                   };
 
+        if(example.ServerName != null)
+        {
+            tag.Add(TagsKeys.Server, example.ServerName);
+        }
+        if(example.DatabaseName != null)
+        {
+            tag.Add(TagsKeys.Database, example.DatabaseName);
+        }
+        if(example.TableName != null)
+        {
+            tag.Add(TagsKeys.Table, example.TableName);
+        }
+        
         await _memory.ImportTextAsync(example.UserPromptExample,
                                       documentId: id,
                                       tags: tag,

@@ -18,8 +18,8 @@ public interface IMemorySearchService
 {
     IAsyncEnumerable<TableSchema> SearchDataBaseSchema(string userPrompt, int supportingContentCount, CancellationToken cancellationToken = default);
     IAsyncEnumerable<Example> SearchExamples(string userPrompt, int supportingContentCount, CancellationToken cancellationToken = default);
-    IAsyncEnumerable<TableSchema> CanGetAllSchemas();
-    IAsyncEnumerable<Example> CanGetAllExamples();
+    IAsyncEnumerable<TableSchema> GetAllSchemas();
+    IAsyncEnumerable<Example> GetAllExamples();
 }
 
 public class MemorySearchService : IMemorySearchService
@@ -163,7 +163,7 @@ public class MemorySearchService : IMemorySearchService
         }
     }
 
-    public async IAsyncEnumerable<TableSchema> CanGetAllSchemas()
+    public async IAsyncEnumerable<TableSchema> GetAllSchemas()
     {
         var searchClient = new SearchClient(
             new Uri(_azureAiSearchEndpoint),
@@ -194,11 +194,12 @@ public class MemorySearchService : IMemorySearchService
 
             if (result.Document.TryGetValue("tags", out var tags))
             {
-                var tagsArray = ((object[])tags).Skip(6).ToArray();
-                serverName = tagsArray[0].ToString().Replace($"{TagsKeys.Server}:", string.Empty);
-                databaseName = tagsArray[1].ToString().Replace($"{TagsKeys.Database}:", string.Empty);
-                tableName = tagsArray[2].ToString().Replace($"{TagsKeys.Table}:", string.Empty);
-                connectionString = tagsArray[3].ToString().Replace($"{TagsKeys.ConnectionString}:", string.Empty);
+                var tagsArray = ((object[])tags).Skip(6).Cast<string>().ToArray();
+                
+                serverName = tagsArray.GetTagValue(TagsKeys.Server);
+                databaseName = tagsArray.GetTagValue(TagsKeys.Database);
+                tableName = tagsArray.GetTagValue(TagsKeys.Table);
+                connectionString = tagsArray.GetTagValue(TagsKeys.ConnectionString);
             }
 
             if (result.Document.TryGetValue("payload", out var payload))
@@ -227,7 +228,7 @@ public class MemorySearchService : IMemorySearchService
         }
     }
 
-    public async IAsyncEnumerable<Example> CanGetAllExamples()
+    public async IAsyncEnumerable<Example> GetAllExamples()
     {
         var searchClient = new SearchClient(
             new Uri(_azureAiSearchEndpoint),
@@ -252,11 +253,12 @@ public class MemorySearchService : IMemorySearchService
 
             if (result.Document.TryGetValue("tags", out var tags))
             {
-                var tagsArray = ((object[])tags).Skip(6).ToArray();
-                serverName = tagsArray[0].ToString().Replace($"{TagsKeys.Server}:", string.Empty);
-                databaseName = tagsArray[1].ToString().Replace($"{TagsKeys.Database}:", string.Empty);
-                tableName = tagsArray[2].ToString().Replace($"{TagsKeys.Table}:", string.Empty);
-                sqlExample = tagsArray[3].ToString().Replace($"{TagsKeys.SqlExample}:", string.Empty);
+                var tagsArray = ((object[])tags).Skip(6).Cast<string>().ToArray();
+
+                sqlExample = tagsArray.GetTagValue(TagsKeys.SqlExample);
+                serverName = tagsArray.GetTagValue(TagsKeys.Server);
+                databaseName = tagsArray.GetTagValue(TagsKeys.Database);
+                tableName = tagsArray.GetTagValue(TagsKeys.Table);
             }
 
             if (result.Document.TryGetValue("payload", out var payload))
@@ -281,4 +283,6 @@ public class MemorySearchService : IMemorySearchService
             };
         }
     }
+
+    
 }

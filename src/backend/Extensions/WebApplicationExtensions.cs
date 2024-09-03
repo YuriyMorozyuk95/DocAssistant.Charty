@@ -69,7 +69,7 @@ internal static class WebApplicationExtensions
         [FromServices] IMemorySearchService memorySearchService,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var schema in memorySearchService.CanGetAllSchemas().WithCancellation(cancellationToken))
+        await foreach (var schema in memorySearchService.GetAllSchemas().WithCancellation(cancellationToken))
         {
             yield return schema;
         }
@@ -92,7 +92,7 @@ internal static class WebApplicationExtensions
         [FromServices] IMemorySearchService memorySearchService,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var example in memorySearchService.CanGetAllExamples().WithCancellation(cancellationToken))
+        await foreach (var example in memorySearchService.GetAllExamples().WithCancellation(cancellationToken))
         {
             yield return example;
         }

@@ -31,43 +31,6 @@ namespace MinimalApi.Tests.Playground
             var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         }
 
-        [Fact]  
-        public async Task CanGetAllExamples()  
-        {  
-            await foreach (var example in _memorySearchService.CanGetAllExamples())  
-            {  
-                _output.WriteLine($"ServerName: {example.ServerName}");  
-                _output.WriteLine($"DatabaseName: {example.DatabaseName}");  
-                _output.WriteLine($"TableName: {example.TableName}");  
-                _output.WriteLine($"SQL Example: {example.SqlExample}");  
-                _output.WriteLine($"User Prompt Example: {example.UserPromptExample}");  
-            }  
-        }
-
-        [Fact]  
-        public async Task UploadExampleToMemoryTest()  
-        {  
-            var example = new Example  
-                          {  
-                              ServerName = "test-server",  
-                              DatabaseName = "test-database",  
-                              TableName = "test-table",  
-                              SqlExample = "SELECT * FROM test-table",  
-                              UserPromptExample = "Get all records from test-table"  
-                          };  
-  
-            _output.WriteLine($"Uploading Example: {example.SqlExample}");  
-            var documentId = await _memoryManagerService.UploadExampleToMemory(example);  
-            Assert.NotNull(documentId);  
-            _output.WriteLine($"Uploaded Example DocumentId: {documentId}");  
-        }  
-  
-        [Fact]  
-        public async Task CleanUpExamples()  
-        {  
-            await _memoryManagerService.RemoveExampleSchemaIndex();  
-        }
-
         [Fact]
         public async Task GenerateAndUploadAzureSqlSchemaToMemory()
         {
@@ -88,7 +51,7 @@ namespace MinimalApi.Tests.Playground
         [Fact]
         public async Task CanGetAllSchemas()
         {
-            await foreach (var table in _memorySearchService.CanGetAllSchemas())
+            await foreach (var table in _memorySearchService.GetAllSchemas())
             {
                 _output.WriteLine($"ServerName: {table.ServerName}");
                 _output.WriteLine($"DatabaseName: {table.DatabaseName}");

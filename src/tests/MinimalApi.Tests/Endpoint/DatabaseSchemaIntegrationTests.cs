@@ -27,11 +27,11 @@ public class DatabaseSchemaIntegrationTests : IClassFixture<WebApplicationFactor
         // Arrange  
         var example = new Example  
                       {  
-                          ServerName = "test-server",  
-                          DatabaseName = "test-database",  
-                          TableName = "test-table",  
-                          SqlExample = "SELECT * FROM test-table",  
-                          UserPromptExample = "Get all records from test-table"  
+                          ServerName = "test-server1",  
+                          DatabaseName = "test-database1",  
+                          TableName = "test-table1",  
+                          SqlExample = "SELECT * FROM test-table1",  
+                          UserPromptExample = "Get all records from test-table1",
                       };  
         var cancellationToken = CancellationToken.None;  
   

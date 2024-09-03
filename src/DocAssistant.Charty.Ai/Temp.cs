@@ -31,7 +31,7 @@ public class SupportingContent
 
     public int Rank {get;set;}
 
-    public SupportingContentType SupportingContentType { get;set;}
+    public SupportingContentType SupportingContentType { get; set; }
 
 }
 
@@ -40,4 +40,5 @@ public enum SupportingContentType
     Schema = 0,
     SqlQuery = 1,
     TableResult = 2,
+    Examples = 3, 
 }

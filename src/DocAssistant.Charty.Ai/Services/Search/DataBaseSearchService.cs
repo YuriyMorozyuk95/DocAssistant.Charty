@@ -23,11 +23,19 @@ public class DataBaseSearchService : IDataBaseSearchService
 
     private readonly ISqlExecutorService _sqlExecutorService;
 
-    public DataBaseSearchService(IMemorySearchService memorySearchService, Kernel kernel, IConfiguration configuration, ISqlExecutorService sqlExecutorService)
+    private readonly ISqlExampleService _sqlExampleService;
+
+    public DataBaseSearchService(
+        IMemorySearchService memorySearchService,
+        Kernel kernel,
+        IConfiguration configuration,
+        ISqlExecutorService sqlExecutorService,
+        ISqlExampleService sqlExampleService)
     {
         _memorySearchService = memorySearchService;
         _kernel = kernel;
         _sqlExecutorService = sqlExecutorService;
+        _sqlExampleService = sqlExampleService;
     }
 
     public async Task<List<SupportingContent>> Search(string userPrompt, DataBaseSearchConfig config, CancellationToken cancellationToken = default)
@@ -40,35 +48,45 @@ public class DataBaseSearchService : IDataBaseSearchService
             {
                 var schemas = await GetSchemas(userPrompt, config.TableCount, cancellationToken);
 
-                foreach(var schema in schemas)
+                foreach (var schema in schemas)
                 {
                     supportingContent.Add(new SupportingContent
-                                          {
-                                              Title = "Schema",
-                                              Content = schema.Value,
-                                              IsDebug = true,
-                                              SupportingContentType = SupportingContentType.Schema,
-                                          });
+                    {
+                        Title = "Schema",
+                        Content = schema.Value,
+                        IsDebug = true,
+                        SupportingContentType = SupportingContentType.Schema,
+                    });
 
-                    config.Query = await TranslatePromptToQuery(userPrompt, schema.Value, config.ResultsNumberLimit, cancellationToken);
+                    var examples = await GetExamples(userPrompt, config.ExamplesCount, cancellationToken);
 
                     supportingContent.Add(new SupportingContent
                                           {
-                                              Title = "T-SQL query",
-                                              Content = config.Query,
+                                              Title = "Examples",
+                                              Content = examples,
                                               IsDebug = true,
-                                              SupportingContentType = SupportingContentType.SqlQuery,
+                                              SupportingContentType = SupportingContentType.Examples,
                                           });
+
+                    config.Query = await TranslatePromptToQuery(userPrompt, schema.Value, examples, config.ResultsNumberLimit, cancellationToken);
+
+                    supportingContent.Add(new SupportingContent
+                    {
+                        Title = "T-SQL query",
+                        Content = config.Query,
+                        IsDebug = true,
+                        SupportingContentType = SupportingContentType.SqlQuery,
+                    });
 
                     var tableResult = await _sqlExecutorService.GetMarkdownTable(schema.Key, config.Query, config.ResultsNumberLimit, cancellationToken);
 
                     supportingContent.Add(new SupportingContent
-                                          {
-                                              Title = "Table Result",
-                                              Content = tableResult,
-                                              IsDebug = true,
-                                              SupportingContentType = SupportingContentType.TableResult,
-                                          });
+                    {
+                        Title = "Table Result",
+                        Content = tableResult,
+                        IsDebug = true,
+                        SupportingContentType = SupportingContentType.TableResult,
+                    });
                 }
             }
 
@@ -86,7 +104,8 @@ public class DataBaseSearchService : IDataBaseSearchService
         return supportingContent;
     }
 
-    public async Task<string> TranslatePromptToQuery(string prompt, string schema, int count, CancellationToken cancellationToken)
+
+    public async Task<string> TranslatePromptToQuery(string prompt, string schema, string examples, int count, CancellationToken cancellationToken)
     {
         var sqlTranslatorFunc = GetSqlTranslatorFunc();
 
@@ -95,6 +114,7 @@ public class DataBaseSearchService : IDataBaseSearchService
                                 { "input", prompt },
                                 { "count", count.ToString() },
                                 { "schema", schema },
+                                { "examples", examples },
                                 { "dateTime", DateTimeOffset.UtcNow.ToString() },
                             };
 
@@ -110,36 +130,51 @@ public class DataBaseSearchService : IDataBaseSearchService
         return func;
     }
 
-    public async Task<Dictionary<string, string>> GetSchemas(string userPrompt, int tableCount, CancellationToken cancellationToken = default)  
-    {  
-        var schemasPerDatabase = new Dictionary<string, string>();  
-        var tableSchemas = await _memorySearchService.SearchDataBaseSchema(userPrompt, tableCount, cancellationToken).ToListAsync(cancellationToken: cancellationToken);  
-        var schemaPerConnectionString = tableSchemas.GroupBy(x => x.ConnectionString);  
-  
-        foreach (var tableInConnectionString in schemaPerConnectionString)  
-        {  
-            var firstItem = tableInConnectionString.First();  
-            StringBuilder builder = new StringBuilder();  
-          
+    public async Task<string> GetExamples(string userPrompt, int configExamplesCount, CancellationToken cancellationToken = default)
+    {
+        var examples = await _memorySearchService.SearchExamples(userPrompt, configExamplesCount, cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+
+        var builder = new StringBuilder();
+
+        foreach (var example in examples)
+        {
+            var xmlExample = _sqlExampleService.GenerateXmlResponse(example.UserPromptExample, example.SqlExample);
+            builder.AppendLine(xmlExample);
+        }
+
+        return builder.ToString();
+    }
+
+    public async Task<Dictionary<string, string>> GetSchemas(string userPrompt, int tableCount, CancellationToken cancellationToken = default)
+    {
+        var schemasPerDatabase = new Dictionary<string, string>();
+        var tableSchemas = await _memorySearchService.SearchDataBaseSchema(userPrompt, tableCount, cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+        var schemaPerConnectionString = tableSchemas.GroupBy(x => x.ConnectionString);
+
+        foreach (var tableInConnectionString in schemaPerConnectionString)
+        {
+            var firstItem = tableInConnectionString.First();
+            StringBuilder builder = new StringBuilder();
+
             // Append server and database information in Markdown  
-            builder.AppendLine($"## Server: {firstItem.ServerName}");  
-            builder.AppendLine($"### Database: {firstItem.DatabaseName}");  
-            builder.AppendLine();  
-  
-            foreach (var table in tableInConnectionString)  
-            {  
+            builder.AppendLine($"## Server: {firstItem.ServerName}");
+            builder.AppendLine($"### Database: {firstItem.DatabaseName}");
+            builder.AppendLine();
+
+            foreach (var table in tableInConnectionString)
+            {
                 // Append table name and schema in Markdown  
-                builder.AppendLine($"#### Table: {table.TableName}");  
-                builder.AppendLine("```sql");  
-                builder.AppendLine(table.Schema);  
-                builder.AppendLine("```");  
+                builder.AppendLine($"#### Table: {table.TableName}");
+                builder.AppendLine("```sql");
+                builder.AppendLine(table.Schema);
+                builder.AppendLine("```");
                 builder.AppendLine(); // Add a blank line for better readability  
-            }  
-  
-            schemasPerDatabase.Add(firstItem.ConnectionString, builder.ToString());  
-        }  
-  
-        return schemasPerDatabase;  
-    }  
+            }
+
+            schemasPerDatabase.Add(firstItem.ConnectionString, builder.ToString());
+        }
+
+        return schemasPerDatabase;
+    }
 }
 
