@@ -1,15 +1,17 @@
 ﻿
 
 using System.Diagnostics;
-
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Experimental.Agents;
+using Shared.Models;
 
 namespace MinimalApi.Tests.Playground;
 
 using System.Threading.Tasks;
-
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,6 +28,10 @@ public class GenerateChartIntegrationTest : IClassFixture<WebApplicationFactory<
 
     private readonly string _deploymentName;
 
+    private readonly string _containerName;
+
+    private readonly BlobContainerClient _containerClient;
+
     public GenerateChartIntegrationTest(WebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
     {
         _factory = factory;
@@ -34,6 +40,10 @@ public class GenerateChartIntegrationTest : IClassFixture<WebApplicationFactory<
         _azureOpenAiEndpoint = "https://hack-rag-openai.openai.azure.com/";
         _azureApiKey = "8dd7b47322e448fcb6237fa77f26713b";
         _deploymentName = "hack-gpt4o";
+        _containerName = "images";
+        using var scope = factory.Services.CreateScope();
+        BlobServiceClient? blobServiceClient = scope.ServiceProvider.GetService<BlobServiceClient>();
+        _containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
 
         _fileService = new OpenAIFileService(new Uri(_azureOpenAiEndpoint), apiKey: _azureApiKey);
 
@@ -86,9 +96,12 @@ Sum      426  1622     856 2904
                 var path = Path.Combine(Environment.CurrentDirectory, filename);
                 _testOutputHelper.WriteLine($"# {message.Role}: {message.Content}");
                 _testOutputHelper.WriteLine($"# {message.Role}: {path}");
+                SupportingImageRecord imageRecord = await UploadImageAsync(path);
+
                 var content = await _fileService.GetFileContentAsync(message.Content);
                 await using var outputStream = File.OpenWrite(filename);
                 await outputStream.WriteAsync(content.Data!.Value);
+
                 Process.Start(
                     new ProcessStartInfo
                     {
@@ -103,5 +116,21 @@ Sum      426  1622     856 2904
         }
 
         _testOutputHelper.WriteLine("");
+    }
+
+    public async Task<SupportingImageRecord> UploadImageAsync(string filePath)
+    {
+        await _containerClient.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
+
+        string fileName = Path.GetFileName(filePath);
+
+        // Отримуємо BlobClient для нашого файлу  
+        BlobClient blobClient = _containerClient.GetBlobClient(fileName);
+        string fileUrl = blobClient.Uri.ToString();
+
+        // Завантажуємо файл  
+        await blobClient.UploadAsync(filePath, overwrite: true);
+
+        return new SupportingImageRecord(fileName, fileUrl);
     }
 }
