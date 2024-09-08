@@ -182,7 +182,19 @@ dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
 ###############################
 # C# Coding Conventions       #
 ###############################
-[*.cs]
+[*.cs]  
+dotnet_diagnostic.SKEXP0010.severity = none  
+dotnet_diagnostic.SKEXP0101.severity = none  
+dotnet_diagnostic.SKEXP0001.severity = none  
+dotnet_diagnostic.SKEXP0020.severity = none  
+dotnet_diagnostic.SKEXP0040.severity = none  
+dotnet_diagnostic.SKEXP0050.severity = none  
+dotnet_diagnostic.SKEXP0060.severity = none  
+dotnet_diagnostic.SKEXP0070.severity = none  
+dotnet_diagnostic.SKEXP0100.severity = none  
+dotnet_diagnostic.SKEXP0110.severity = none  
+dotnet_diagnostic.KMEXP00.severity = none  
+dotnet_diagnostic.IDE1006.severity = none  
 # var preferences
 dotnet_diagnostic.IDE1006.severity = none  
 csharp_style_var_for_built_in_types = false:none

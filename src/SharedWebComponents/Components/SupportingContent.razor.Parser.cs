@@ -1,7 +1,5 @@
 ﻿
 
-using DocAssistant.Charty.Ai;
-
 namespace SharedWebComponents.Components;
 
 public sealed partial class SupportingContent

@@ -2,8 +2,6 @@
 
 using System.Text.Json.Serialization;
 
-using DocAssistant.Charty.Ai;
-
 namespace Shared.Models;
 
 public record SupportingContentRecord(string Title, string Content);

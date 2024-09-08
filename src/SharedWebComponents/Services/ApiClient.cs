@@ -1,7 +1,5 @@
 ﻿
 
-using DocAssistant.Charty.Ai;
-
 namespace SharedWebComponents.Services;
 
 public sealed class ApiClient(HttpClient httpClient)

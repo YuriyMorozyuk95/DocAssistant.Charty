@@ -22,6 +22,8 @@
     <PackageReference Include="PdfSharpCore" />
     <PackageReference Include="Azure.Storage.Blobs" />
   </ItemGroup>
+  
+  
 
   <ItemGroup>
     <ProjectReference Include="..\DocAssistant.Charty.Ai\DocAssistant.Charty.Ai.csproj" />

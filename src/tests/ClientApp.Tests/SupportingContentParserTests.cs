@@ -1,8 +1,4 @@
-﻿
-
-using DocAssistant.Charty.Ai;
-
-using Shared.Models;
+﻿using Shared.Models;
 
 namespace ClientApp.Tests;
 

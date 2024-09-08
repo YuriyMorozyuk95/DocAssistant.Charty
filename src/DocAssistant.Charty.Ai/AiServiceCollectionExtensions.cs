@@ -7,6 +7,7 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 
 using DocAssistant.Charty.Ai.Services;
+using DocAssistant.Charty.Ai.Services.CodeInterpreter;
 using DocAssistant.Charty.Ai.Services.Database;
 using DocAssistant.Charty.Ai.Services.Search;
 
@@ -118,5 +119,7 @@ public static class AiServiceCollectionExtensions
         services.AddScoped<ISqlExecutorService, SqlExecutorService>();
         services.AddScoped<IDocAssistantChatService, DocAssistantChatService>();
         services.AddScoped<IDataBaseRegistryService, DataBaseRegistryService>();
+
+        services.AddScoped<ICodeInterpreterAgentService, CodeInterpreterAgentService>();
     }
 }

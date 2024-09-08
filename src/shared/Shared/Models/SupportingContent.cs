@@ -1,4 +1,4 @@
-﻿namespace DocAssistant.Charty.Ai;
+﻿namespace Shared.Models;
 
 public class SupportingContentDto
 {

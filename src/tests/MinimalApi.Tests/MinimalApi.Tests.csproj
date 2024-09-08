@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <LangVersion>preview</LangVersion>
+    <NoWarn>$(NoWarn);SKEXP0101,SKEXP0001,SKEXP0010, SKEXP0020, SKEXP0040, SKEXP0050, SKEXP0060, SKEXP0070, SKEXP0100, SKEXP0110, KMEXP00, IDE1006</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
