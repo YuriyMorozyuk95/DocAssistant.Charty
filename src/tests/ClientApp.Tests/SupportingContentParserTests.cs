@@ -1,5 +1,7 @@
 ﻿
 
+using DocAssistant.Charty.Ai;
+
 using Shared.Models;
 
 namespace ClientApp.Tests;
@@ -30,7 +32,7 @@ public class SupportingContentParserTests
 
     [Theory, MemberData(nameof(ParserInput))]
     public void SupportingContentCorrectlyParsesText(
-        SupportingContentRecord supportingContent,
+        SupportingContentDto supportingContent,
         string expectedTitle,
         string? expectedContent)
     {

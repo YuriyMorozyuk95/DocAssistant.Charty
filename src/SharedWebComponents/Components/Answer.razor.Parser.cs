@@ -4,7 +4,7 @@ namespace SharedWebComponents.Components;
 
 public sealed partial class Answer
 {
-    internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl)
+    internal static HtmlParsedAnswer ParseAnswerToHtml(string answer)
     {
         var citations = new List<CitationDetails>();
         var followupQuestions = new HashSet<string>();
@@ -35,7 +35,7 @@ public sealed partial class Answer
                 }
                 else
                 {
-                    var citation = new CitationDetails(part, citationBaseUrl, citationNumber);
+                    var citation = new CitationDetails(part, citationNumber);
                     citations.Add(citation);
                 }
 

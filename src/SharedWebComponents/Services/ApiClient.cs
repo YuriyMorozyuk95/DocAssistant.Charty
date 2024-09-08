@@ -1,9 +1,36 @@
 ﻿
 
+using DocAssistant.Charty.Ai;
+
 namespace SharedWebComponents.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
+    public async Task<string?> UploadExampleAsync(Example example, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/upload-example", example, SerializerOptions.Default, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<UploadExampleResponse>();
+        return result?.DocumentId;
+    }
+
+    public async IAsyncEnumerable<Example> GetAllExamplesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var response = await httpClient.GetAsync("api/get-all-examples", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var options = SerializerOptions.Default;
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await foreach (var example in JsonSerializer.DeserializeAsyncEnumerable<Example>(stream, options, cancellationToken))
+        {
+            if (example is null)
+            {
+                continue;
+            }
+            await Task.Delay(1, cancellationToken);
+            yield return example;
+        }
+    }
+
     public async Task<ImageResponse?> RequestImageAsync(PromptRequest request)
     {
         var response = await httpClient.PostAsJsonAsync(
@@ -65,12 +92,11 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public Task<AnswerResult<ChatRequest>> ChatConversation(ChatRequest request) => PostRequestAsync(request, "api/chat");
-
-    private async Task<AnswerResult<TRequest>> PostRequestAsync<TRequest>(
-        TRequest request, string apiRoute) where TRequest : ApproachRequest
+    public async Task<AnswerResult<ChatRequest>> ChatConversation(ChatRequest request)
     {
-        var result = new AnswerResult<TRequest>(
+        var apiRoute = "api/chat";
+
+        var result = new AnswerResult<ChatRequest>(
             IsSuccessful: false,
             Response: null,
             Approach: request.Approach,
@@ -87,7 +113,20 @@ public sealed class ApiClient(HttpClient httpClient)
 
         if (response.IsSuccessStatusCode)
         {
-            var answer = await response.Content.ReadFromJsonAsync<ChatAppResponseOrError>();
+            var answer = await response.Content.ReadFromJsonAsync<ChatAppResponseOrError>(SerializerOptions.Default);
+
+            //foreach(var supportingContent in answer.Choices.LastOrDefault()?.DataPoints)
+            //{
+            //    var content = Markdown.ToHtml(supportingContent.Content);
+            //    supportingContent.Content = content;
+            //}
+
+            var tableResults = answer.Choices.LastOrDefault()?.DataPoints.Where(x => x.SupportingContentType == SupportingContentType.TableResult);
+            foreach(var table in tableResults)
+            {
+                table.Content = table.Content?.Replace("<br>", Environment.NewLine) ?? string.Empty;
+            }
+
             return result with
             {
                 IsSuccessful = answer is not null,
@@ -107,5 +146,13 @@ public sealed class ApiClient(HttpClient httpClient)
                 Response = answer
             };
         }
+    }
+
+    public async Task<List<Server>> GetAllServersAsync(CancellationToken cancellationToken)  
+    {  
+        var response = await httpClient.GetAsync("api/get-all-servers", cancellationToken);  
+        response.EnsureSuccessStatusCode();  
+        var servers = await response.Content.ReadFromJsonAsync<List<Server>>(cancellationToken: cancellationToken);  
+        return servers ?? new List<Server>();  
     }
 }

@@ -12,7 +12,7 @@ public static class ChatTurnExtensions
         return question.Content;
     }
 	
-    public static ChatMessage MergeLastQuestionWithSystemResponse(this ChatMessage[] history, string botResponse, List<SupportingContent> supportingContent)
+    public static ChatMessage MergeLastQuestionWithSystemResponse(this ChatMessage[] history, string botResponse, List<SupportingContentDto> supportingContent)
     {
         var lastChatTurn = history.LastOrDefault();
 

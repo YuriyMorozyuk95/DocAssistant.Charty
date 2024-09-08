@@ -69,7 +69,15 @@ public sealed partial class Docs : IDisposable
                 // Refresh the table schemas  
                 _tableSchemas.Clear();  
                 await GetTableSchemasAsync();  
-            }  
+            }
+            catch(Exception e)
+            {
+                Snackbar.Add($"Failed to upload example. {e}", Severity.Error, options =>  
+                {  
+                    options.ShowCloseIcon = true;  
+                    options.VisibleStateDuration = 10_000;  
+                });
+            }
             finally  
             {  
                 _isOperationInProgress = false;  

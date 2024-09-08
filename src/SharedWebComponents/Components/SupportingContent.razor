@@ -1,25 +1,20 @@
 ﻿<MudList Clickable="false">
-    @foreach (var (index, value) in _supportingContent.Select((item, i) => (i, item)))
+    @foreach (var supportingContent in DataPoints)
     {
-        if (value.IsEmpty)
-        {
-            continue;
-        }
+        var content = Markdown.ToHtml(supportingContent.Content);
 
-        var (title, content) = value;
-        var last = index == _supportingContent.Length - 1;
-        if (index is not 0 && last is false)
-        {
-            <MudDivider />
-        }
+        <MudDivider />
 
         <MudListItem>
-            <MudText Typo="Typo.subtitle1" Class="pb-2" Style="font-weight: bold;" Color="Color.Primary">@title</MudText>
-            <MudText Typo="Typo.body1">@((MarkupString)content!)</MudText>
+            <MudText Typo="Typo.subtitle1" Class="pb-2" Style="font-weight: bold;" Color="Color.Primary">@supportingContent.Title</MudText>
+            <MudText Typo="Typo.subtitle2">@supportingContent.OriginUri</MudText>
+            <MudText Typo="Typo.body1">
+                @((MarkupString)content)
+            </MudText>
         </MudListItem>
     }
     <MudDivider />
-    @foreach (var (index, value) in Images.Select((item, i) => (i, item)))
+   @*  @foreach (var (index, value) in Images.Select((item, i) => (i, item)))
     {
         var last = index == Images.Length - 1;
         if (value is null)
@@ -37,5 +32,5 @@
         <MudListItem>
             <MudImage Src="@url" Alt="@title" Height="400" />
         </MudListItem>
-    }
+    } *@
 </MudList>

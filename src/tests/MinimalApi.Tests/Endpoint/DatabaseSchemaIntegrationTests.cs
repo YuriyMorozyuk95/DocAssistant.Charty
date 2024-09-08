@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 
+using Shared.Models;
+
 using SharedWebComponents.Services;
 
 using Xunit;
@@ -17,6 +19,57 @@ public class DatabaseSchemaIntegrationTests : IClassFixture<WebApplicationFactor
         _testOutputHelper = testOutputHelper;
         var httpClient = factory.CreateClient();
         _client = new ApiClient(httpClient);
+    }
+
+    [Fact]
+    public async Task Get_AllServers_ReturnsExpectedServers()
+    {
+        var cancellationToken = CancellationToken.None;
+
+        // Act  
+        var servers = await _client.GetAllServersAsync(cancellationToken);
+
+        // Assert  
+        Assert.NotNull(servers);
+        Assert.NotEmpty(servers);
+
+        // Output the servers  
+        foreach (var server in servers)
+        {
+            _testOutputHelper.WriteLine($"ServerName: {server.ServerName}, DatabaseName:  {string.Join(", ", server.Databases.Select(x => x.DatabaseName))} , Tables: {string.Join(", ", server.Databases.SelectMany(x => x.Tables))}");
+        }
+    }
+
+    [Fact]
+    public async Task Post_UploadExample_ReturnsDocumentId()
+    {
+        // Arrange  
+        var example = new Example
+        {
+            ServerName = "test-server1",
+            DatabaseNames = ["test-database1"],
+            TableNames = ["test-table1"],
+            SqlExample = "SELECT * FROM test-table1",
+            UserPromptExample = "Get all records from test-table1",
+        };
+        var cancellationToken = CancellationToken.None;
+
+        // Act  
+        var documentId = await _client.UploadExampleAsync(example, cancellationToken);
+
+        // Assert  
+        Assert.NotNull(documentId);
+        _testOutputHelper.WriteLine($"Uploaded Example DocumentId: {documentId}");
+    }
+
+    [Fact]
+    public async Task Get_AllExamples_ReturnsExpectedExamples()
+    {
+        var cancellationToken = CancellationToken.None;
+        await foreach (var example in _client.GetAllExamplesAsync(cancellationToken))
+        {
+            _testOutputHelper.WriteLine($"Example: {example.UserPromptExample}, SQL: {example.SqlExample}, Table: {string.Join(",", example.TableNames)}, Database: {string.Join(",", example.DatabaseNames)}, Server: {example.ServerName}");
+        }
     }
 
     [Fact]

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Shared.Models;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,7 +51,7 @@ namespace MinimalApi.Tests.Playground
         [Fact]
         public async Task CanGetAllSchemas()
         {
-            await foreach (var table in _memorySearchService.CanGetAllSchemas())
+            await foreach (var table in _memorySearchService.GetAllSchemas())
             {
                 _output.WriteLine($"ServerName: {table.ServerName}");
                 _output.WriteLine($"DatabaseName: {table.DatabaseName}");

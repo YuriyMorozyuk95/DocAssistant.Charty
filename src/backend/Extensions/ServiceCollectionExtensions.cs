@@ -12,87 +12,91 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddAzureServices(this IServiceCollection services)
     {
+#if DEBUG
         services.AddSingleton<TokenCredential, AzureCliCredential>();
+#else
+        services.AddSingleton<TokenCredential, DefaultAzureCredential>();
+#endif
 
-		services.AddSingleton(
-			sp =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-					string accountName = config["KernelMemory:Services:AzureBlobs:Account"];  
-					string endpointSuffix = config["KernelMemory:Services:AzureBlobs:EndpointSuffix"];
+        services.AddSingleton(
+            sp =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+                    string accountName = config["KernelMemory:Services:AzureBlobs:Account"];
+                    string endpointSuffix = config["KernelMemory:Services:AzureBlobs:EndpointSuffix"];
 
-					string blobEndpoint = $"https://{accountName}.blob.{endpointSuffix}";  
-  
-					// Create a BlobServiceClient that will authenticate through Active Directory  
-					var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), sp.GetRequiredService<TokenCredential>());  
-					return blobServiceClient;
-				});
+                    string blobEndpoint = $"https://{accountName}.blob.{endpointSuffix}";
 
-		services.AddSingleton(
-			sp =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-					var azureStorageContainer = config["KernelMemory:Services:AzureBlobs:Container"];
-					return sp.GetRequiredService<BlobServiceClient>()
-						.GetBlobContainerClient(azureStorageContainer);
-				});
+                    // Create a BlobServiceClient that will authenticate through Active Directory  
+                    var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), sp.GetRequiredService<TokenCredential>());
+                    return blobServiceClient;
+                });
 
-		services.AddSingleton(
-			sp =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-					var azureSearchServiceEndpoint = config["KernelMemory:Services:AzureAISearch:Endpoint"];
+        services.AddSingleton(
+            sp =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+                    var azureStorageContainer = config["KernelMemory:Services:AzureBlobs:Container"];
+                    return sp.GetRequiredService<BlobServiceClient>()
+                        .GetBlobContainerClient(azureStorageContainer);
+                });
 
-					var credential = sp.GetRequiredService<TokenCredential>();
+        services.AddSingleton(
+            sp =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+                    var azureSearchServiceEndpoint = config["KernelMemory:Services:AzureAISearch:Endpoint"];
 
-					var searchIndexClient = new SearchIndexClient(
-						new Uri(azureSearchServiceEndpoint!),
-						credential,
-						new SearchClientOptions
-						{
-							Transport = new HttpClientTransport(
-								new HttpClient(
-									new HttpClientHandler()
-									{
-										Proxy = new WebProxy()
-												{
-													BypassProxyOnLocal = false,
-													UseDefaultCredentials = true,
-												}
-									}))
-						});
+                    var credential = sp.GetRequiredService<TokenCredential>();
 
-					return searchIndexClient;
-				});
+                    var searchIndexClient = new SearchIndexClient(
+                        new Uri(azureSearchServiceEndpoint!),
+                        credential,
+                        new SearchClientOptions
+                        {
+                            Transport = new HttpClientTransport(
+                                new HttpClient(
+                                    new HttpClientHandler()
+                                    {
+                                        Proxy = new WebProxy()
+                                        {
+                                            BypassProxyOnLocal = false,
+                                            UseDefaultCredentials = true,
+                                        }
+                                    }))
+                        });
 
-		services.AddSingleton(
-			sp =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-					var documentIntelligenceEndpoint = config["AzureDocumentIntelligenceEndpoint"];
+                    return searchIndexClient;
+                });
 
-					ArgumentNullException.ThrowIfNullOrEmpty(documentIntelligenceEndpoint);
+        services.AddSingleton(
+            sp =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+                    var documentIntelligenceEndpoint = config["AzureDocumentIntelligenceEndpoint"];
 
-					var credential = sp.GetRequiredService<TokenCredential>();
+                    ArgumentNullException.ThrowIfNullOrEmpty(documentIntelligenceEndpoint);
 
-					var documentAnalysisClient = new DocumentAnalysisClient(
-						new Uri(documentIntelligenceEndpoint),
-						credential,
-						new DocumentAnalysisClientOptions
-						{
-							Transport = new HttpClientTransport(
-								new HttpClient(
-									new HttpClientHandler()
-									{
-										Proxy = new WebProxy()
-												{
-													BypassProxyOnLocal = false,
-													UseDefaultCredentials = true,
-												}
-									}))
-						});
-					return documentAnalysisClient;
-				});
+                    var credential = sp.GetRequiredService<TokenCredential>();
+
+                    var documentAnalysisClient = new DocumentAnalysisClient(
+                        new Uri(documentIntelligenceEndpoint),
+                        credential,
+                        new DocumentAnalysisClientOptions
+                        {
+                            Transport = new HttpClientTransport(
+                                new HttpClient(
+                                    new HttpClientHandler()
+                                    {
+                                        Proxy = new WebProxy()
+                                        {
+                                            BypassProxyOnLocal = false,
+                                            UseDefaultCredentials = true,
+                                        }
+                                    }))
+                        });
+                    return documentAnalysisClient;
+                });
 
 
         return services;

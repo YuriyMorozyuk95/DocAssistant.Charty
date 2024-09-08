@@ -2,6 +2,7 @@
 
 using DocAssistant.Charty.Ai.Services;
 using DocAssistant.Charty.Ai.Services.Database;
+using DocAssistant.Charty.Ai.Services.Search;
 
 namespace MinimalApi.Extensions;
 
@@ -11,38 +12,24 @@ internal static class WebApplicationExtensions
     {
         var api = app.MapGroup("api");
 
-        // Blazor 📎 Clippy streaming endpoint
-        //api.MapPost("openai/chat", OnPostChatPromptAsync);
-
-        //// Long-form chat w/ contextual history endpoint
         api.MapPost("chat", OnPostChatAsync);
 
         api.MapPost("upload-database-schema", OnPostUploadDatabaseSchemaAsync);
 
         api.MapGet("get-all-database-schema", OnGetAllDatabaseSchemaAsync);
 
-        //// Get all documents
-        //api.MapGet("documents", OnGetDocumentsAsync);
+        api.MapPost("upload-example", OnPostUploadExampleAsync);
 
-        //// Get DALL-E image result from prompt
-        //api.MapPost("images", OnPostImagePromptAsync);
+        api.MapGet("get-all-examples", OnGetAllExamplesAsync);
 
-        //api.MapGet("enableLogout", OnGetEnableLogout);
+        api.MapGet("get-all-servers", OnGetAllServersAsync);
 
         return app;
     }
 
-    private static IResult OnGetEnableLogout(HttpContext context)
-    {
-        var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
-        var enableLogout = !string.IsNullOrEmpty(header);
-
-        return TypedResults.Ok(enableLogout);
-    }
-
     private static async Task<IResult> OnPostChatAsync(
-        [FromBody]ChatRequest request,
-        [FromServices]IDocAssistantChatService chatService,
+        [FromBody] ChatRequest request,
+        [FromServices] IDocAssistantChatService chatService,
         CancellationToken cancellationToken)
     {
         if (request is { History.Length: > 0 })
@@ -57,76 +44,73 @@ internal static class WebApplicationExtensions
     }
 
 
-    private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(
-        BlobContainerClient client,
+    private static async IAsyncEnumerable<string> OnPostUploadDatabaseSchemaAsync(
+        [FromBody] UploadDatabaseSchemaRequest request,
+        [FromServices] IAzureSqlSchemaGenerator azureSqlSchemaGenerator,
+        [FromServices] IMemoryManagerService memoryManagerService,
+        [FromServices] IDataBaseRegistryService dataBaseRegistryService,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var blob in client.GetBlobsAsync(cancellationToken: cancellationToken))
+        var tables = azureSqlSchemaGenerator.GetTableNamesDdlSchemas(request.ConnectionString);
+
+        yield return $"Uploading Server info";
+        var server = await dataBaseRegistryService.AddNewServer(tables);
+        yield return $"Server info {server.ServerName} uploaded";
+
+        foreach (var table in tables)
         {
-            if (blob is not null and { Deleted: false })
+            yield return $"Uploading Table: {table.TableName}";
+            var uploadedTable = await memoryManagerService.UploadTableSchemaToMemory(table, cancellationToken);
+
+            if (uploadedTable.DocumentId != null)
             {
-                var props = blob.Properties;
-                var baseUri = client.Uri;
-                var builder = new UriBuilder(baseUri);
-                builder.Path += $"/{blob.Name}";
-
-                var metadata = blob.Metadata;
-                var documentProcessingStatus = GetMetadataEnumOrDefault<DocumentProcessingStatus>(
-                    metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
-                var embeddingType = GetMetadataEnumOrDefault<EmbeddingType>(
-                    metadata, nameof(EmbeddingType), EmbeddingType.AzureSearch);
-
-                yield return new(
-                    blob.Name,
-                    props.ContentType,
-                    props.ContentLength ?? 0,
-                    props.LastModified,
-                    builder.Uri,
-                    documentProcessingStatus,
-                    embeddingType);
-
-                static TEnum GetMetadataEnumOrDefault<TEnum>(
-                    IDictionary<string, string> metadata,
-                    string key,
-                    TEnum @default) where TEnum : struct => metadata.TryGetValue(key, out var value)
-                        && Enum.TryParse<TEnum>(value, out var status)
-                            ? status
-                            : @default;
+                yield return $"Uploaded DocumentId: {uploadedTable.DocumentId}";
+            }
+            else
+            {
+                yield return $"Failed to upload table: {table.TableName}";
             }
         }
     }
 
-    private static async IAsyncEnumerable<string> OnPostUploadDatabaseSchemaAsync(  
-        [FromBody] UploadDatabaseSchemaRequest request,  
-        [FromServices] IAzureSqlSchemaGenerator azureSqlSchemaGenerator,  
-        [FromServices] IMemoryManagerService memoryManagerService,  
-        [EnumeratorCancellation] CancellationToken cancellationToken)  
-    {  
-        var tables = azureSqlSchemaGenerator.GetTableNamesDdlSchemas(request.ConnectionString);
-
-        foreach (var table in tables)  
-        {  
-            yield return $"Uploading Table: {table.TableName}";  
-            var uploadedTable = await memoryManagerService.UploadTableSchemaToMemory(table, cancellationToken);
-
-            if (uploadedTable.DocumentId != null)  
-            {  
-                yield return $"Uploaded DocumentId: {uploadedTable.DocumentId}";  
-            }  
-            else  
-            {  
-                yield return $"Failed to upload table: {table.TableName}";  
-            }  
-        }  
+    private static async IAsyncEnumerable<TableSchema> OnGetAllDatabaseSchemaAsync(
+        [FromServices] IMemorySearchService memorySearchService,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var schema in memorySearchService.GetAllSchemas().WithCancellation(cancellationToken))
+        {
+            yield return schema;
+        }
     }
 
-    private static async IAsyncEnumerable<TableSchema> OnGetAllDatabaseSchemaAsync(  
-        [FromServices] IMemorySearchService memorySearchService,  
-        [EnumeratorCancellation] CancellationToken cancellationToken)  
-    {  
-        await foreach (var schema in memorySearchService.CanGetAllSchemas().WithCancellation(cancellationToken))  
-        {  
-            yield return schema;  
-        }  
+    private static async Task<IResult> OnPostUploadExampleAsync(
+        [FromBody] Example example,
+        [FromServices] IMemoryManagerService memoryManagerService,
+        CancellationToken cancellationToken)
+    {
+        var documentId = await memoryManagerService.UploadExampleToMemory(example, cancellationToken);
+        if (documentId != null)
+        {
+            return TypedResults.Ok(new { DocumentId = documentId });
+        }
+        return Results.BadRequest("Failed to upload example.");
     }
+
+    private static async IAsyncEnumerable<Example> OnGetAllExamplesAsync(
+        [FromServices] IMemorySearchService memorySearchService,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var example in memorySearchService.GetAllExamples().WithCancellation(cancellationToken))
+        {
+            yield return example;
+        }
+    }
+
+    private static async Task<IResult> OnGetAllServersAsync(  
+        [FromServices] IDataBaseRegistryService dataBaseRegistryService,  
+        CancellationToken cancellationToken)  
+    {  
+        var servers = await dataBaseRegistryService.GetAllServers();  
+        return TypedResults.Ok(servers);  
+    } 
 }

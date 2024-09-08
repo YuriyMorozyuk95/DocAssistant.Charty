@@ -1,0 +1,137 @@
+﻿@page "/examples"
+<PageTitle>Examples</PageTitle>
+
+<MudGrid Justify="Justify.Center">
+    <!-- Display Logs -->
+    @if (_isOperationInProgress)
+    {
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Logs</MudText>
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                    <MudList>
+                        @foreach (var log in _logs)
+                        {
+                            <MudListItem>@log</MudListItem>
+                        }
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+    <!-- Upload Example -->
+    <MudItem id="uploads" xs="12" Class="overflow-x-auto">
+        <MudCard>
+            <MudForm @ref="_form">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5">Upload Example</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Color="Color.Default" Disabled="@_isOperationInProgress" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText Class="pb-4">
+                        Enter the details to upload the example.
+                    </MudText>
+                    <MudTextField @bind-Value="Example.UserPromptExample" Label="User Prompt Example" FullWidth="true" Required="true" Disabled="@_isOperationInProgress" />
+                    <MudTextField @bind-Value="Example.SqlExample" Label="SQL Example" FullWidth="true" Required="true" Disabled="@_isOperationInProgress" />
+                    <MudSelect Value="Example.ServerName" Label="Server Name" Variant="Variant.Outlined" T="string" Disabled="@_isOperationInProgress" ValueChanged="OnSelectedServerChanged">
+                        @foreach (var server in _servers)
+                        {
+                            <MudSelectItem Value="@server.ServerName">@server.ServerName</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudSelect T="string" SelectedValues="_selectedDatabases" Label="Select Databases" Variant="Variant.Outlined" MultiSelection="true" Disabled="@_isOperationInProgress" SelectedValuesChanged="OnSelectedDatabasesChanged">
+                        @if (_selectedServer != null)
+                        {
+                            @foreach (var database in _selectedServer.Databases)
+                            {
+                                <MudSelectItem Value="@database.DatabaseName">@database.DatabaseName</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                    <MudSelect T="string" SelectedValues="_selectedTables" Label="Select Tables" Variant="Variant.Outlined" MultiSelection="true" Disabled="@_isOperationInProgress" SelectedValuesChanged="OnSelectedTableChanged">
+                        @if (_selectedDatabases != null && _selectedServer != null)
+                        {
+                            @foreach (var database in _selectedServer.Databases.Where(db => _selectedDatabases.Contains(db.DatabaseName)))
+                            {
+                                @foreach (var table in database.Tables)
+                                {
+                                    <MudSelectItem Value="@table">@table</MudSelectItem>
+                                }
+                            }
+                        }
+                    </MudSelect>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton StartIcon="@Icons.Material.Filled.Clear"
+                               Variant="Variant.Filled"
+                               Color="Color.Error"
+                               Size="Size.Large" Class="ml-2 mb-2"
+                               OnClick="ClearExampleFields" Disabled="@_isOperationInProgress">
+                        Clear
+                    </MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Upload"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large" Class="ml-auto mr-2 mb-2"
+                               OnClick="@(async _ => await SubmitExampleAsync())" Disabled="@_isOperationInProgress">
+                        Upload Example
+                    </MudButton>
+                </MudCardActions>
+            </MudForm>
+        </MudCard>
+    </MudItem>
+    <!-- Display Examples -->
+    <MudItem xs="12">
+        <MudTable Items="@_examples" Dense="true" Hover="true" Bordered="true"
+                  FixedHeader="true" Filter="OnExampleFilter" Elevation="4">
+            <ToolBarContent>
+                @if (_isLoadingExamples)
+                {
+                    <MudText Typo="Typo.h5">
+                        Loading Examples
+                    </MudText>
+                    <MudProgressCircular Indeterminate="true"
+                                         Size="Size.Small" Class="ml-2" />
+                }
+                else
+                {
+                    <MudText Typo="Typo.h5">
+                        Existing Examples
+                    </MudText>
+                }
+                <MudSpacer />
+                <MudTextField @bind-Value="@_exampleFilter" Placeholder="Filter" Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
+                              DebounceInterval="500" Class="mt-0">
+                </MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>User Prompt Example</MudTh>
+                <MudTh>SQL Example</MudTh>
+                <MudTh>Server Name</MudTh>
+                <MudTh>Database Name</MudTh>
+                <MudTh>Table Name</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="User Prompt Example">@context.UserPromptExample</MudTd>
+                <MudTd DataLabel="SQL Example">@context.SqlExample</MudTd>
+                <MudTd DataLabel="Server Name">@context.ServerName</MudTd>
+                <MudTd DataLabel="Database Name">@string.Join(", ", context.DatabaseNames)</MudTd>
+                <MudTd DataLabel="Table Name">@string.Join(", ", context.TableNames)</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudItem>
+    <MudScrollToTop Selector="#uploads"
+                    VisibleCssClass="visible absolute"
+                    HiddenCssClass="invisible">
+        <MudFab Color="Color.Primary" IconSize="Size.Large" StartIcon="@Icons.Material.Filled.ArrowUpward" />
+    </MudScrollToTop>
+</MudGrid>

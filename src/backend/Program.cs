@@ -6,6 +6,8 @@ using DocAssistant.Charty.Ai;
 using NLog;
 using NLog.Web;
 
+using Shared.Json;
+
 namespace MinimalApi
 {
     public class Program
@@ -34,40 +36,13 @@ namespace MinimalApi
                 builder.Services.AddRazorPages();
                 builder.Services.AddCrossOriginResourceSharing();  
                 builder.Services.AddAzureServices();
-                //builder.Services.AddAntiforgery(options =>  
-                //{  
-                //    options.HeaderName = "X-CSRF-TOKEN-HEADER";  
-                //    options.FormFieldName = "X-CSRF-TOKEN-FORM";  
-                //});  
                 builder.Services.AddHttpClient();
-
-                //if (builder.Environment.IsDevelopment())
-                //{
-                //    builder.Services.AddDistributedMemoryCache();
-                //}
-                //else
-                //{
-                //    //static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);  
-
-                //    // Set application telemetry  
-                //    // if (GetEnvVar("APPLICATIONINSIGHTS_CONNECTION_STRING") is string appInsightsConnectionString && !string.IsNullOrEmpty(appInsightsConnectionString))  
-                //    // {  
-                //    //     builder.Services.AddApplicationInsightsTelemetry(option =>  
-                //    //     {  
-                //    //         option.ConnectionString = appInsightsConnectionString;  
-                //    //     });  
-                //    // }  
-                //}
-
                 builder.Services.AddAiServices();
 
-                //builder.Services.AddCors(options =>  
-                //{  
-                //    options.AddPolicy("AllowAllOrigins",  
-                //        builder => builder.AllowAnyOrigin()  
-                //            .AllowAnyHeader()  
-                //            .AllowAnyMethod());  
-                //});  
+                builder.Services.Configure<JsonOptions>(options =>  
+                {
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });  
 
                 var app = builder.Build();
 

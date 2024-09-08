@@ -9,3 +9,19 @@ public class TableSchema
     public string Schema { get; set; }
     public string ConnectionString { get; set; }
 }
+
+public class Example
+{
+    public string DocumentId { get; set; }
+    public string UserPromptExample { get; set; }  
+    public string SqlExample { get; set; }  
+    public string ServerName { get; set; }
+    public IEnumerable<string> DatabaseNames { get; set; }  
+    public IEnumerable<string> TableNames { get; set; }  
+    public string ConnectionString { get; set; }
+}
+
+public class UploadExampleResponse  
+{  
+    public string? DocumentId { get; set; }  
+}

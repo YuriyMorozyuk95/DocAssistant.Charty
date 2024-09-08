@@ -88,7 +88,6 @@ public static class AiServiceCollectionExtensions
 					var azureAiSearchConfig = new AzureAISearchConfig();
 					var azureBlobConfig = new AzureBlobsConfig();
 					var searchClientConfig = new SearchClientConfig();
-
 					config.BindSection("KernelMemory:Services:AzureOpenAIText", azureOpenAiTextConfig);
 					config.BindSection("KernelMemory:Services:AzureOpenAIEmbedding", azureOpenAiEmbeddingConfig);
 					config.BindSection("KernelMemory:Services:AzureBlobs", azureBlobConfig);
@@ -110,7 +109,7 @@ public static class AiServiceCollectionExtensions
 				});
 
         services.AddScoped<IAzureSqlSchemaGenerator, AzureSqlSchemaGenerator>();
-
+        services.AddScoped<IExampleService, ExampleService>();
 
         services.AddScoped<IDocumentStorageService, DocumentStorageService>();
         services.AddScoped<IMemoryManagerService, MemoryManagerService>();
@@ -118,7 +117,6 @@ public static class AiServiceCollectionExtensions
         services.AddScoped<IDataBaseSearchService, DataBaseSearchService>();
         services.AddScoped<ISqlExecutorService, SqlExecutorService>();
         services.AddScoped<IDocAssistantChatService, DocAssistantChatService>();
-
-        //services.AddTransient<IDocAssistantChatService, IDocAssistantChatService>();
+        services.AddScoped<IDataBaseRegistryService, DataBaseRegistryService>();
     }
 }

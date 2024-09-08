@@ -16,4 +16,9 @@ internal static class StringExtensions
 
         return builder.Uri.AbsoluteUri;
     }
+
+    public static string GetTagValue(this string[] tagsArray, string key)
+    {
+        return tagsArray.FirstOrDefault(x => x.StartsWith(key)).Replace($"{key}:", string.Empty);
+    }
 }

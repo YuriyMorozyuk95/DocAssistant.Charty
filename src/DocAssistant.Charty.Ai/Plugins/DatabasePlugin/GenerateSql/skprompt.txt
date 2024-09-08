@@ -20,44 +20,7 @@ Using the user's prompt, generate a T-SQL query that accomplishes the described 
 ## Example Prompts and Responses  
   
 <Examples>  
-    <Example>  
-        <UserPrompt>  
-            List all customers' names and their emails.
-        </UserPrompt>  
-        <AssistantResponse>  
-            <TSQLQuery>  
-                SELECT CustomerName, Email  
-                FROM Customers;
-            </TSQLQuery>  
-        </AssistantResponse>  
-    </Example>
-    
-    <Example>  
-        <UserPrompt>  
-            Show the products supplied by supplier with ID 3.
-        </UserPrompt>  
-        <AssistantResponse>  
-            <TSQLQuery>  
-                SELECT p.ProductName  
-                FROM Products p  
-                JOIN ProductSuppliers ps ON p.ProductID = ps.ProductID  
-                WHERE ps.SupplierID = 3;
-            </TSQLQuery>  
-        </AssistantResponse>  
-    </Example>
-      
-    <Example>  
-        <UserPrompt>  
-           Get the total quantity of products ordered in order ID 15.
-        </UserPrompt>  
-        <AssistantResponse>  
-            <TSQLQuery>  
-                SELECT SUM(Quantity) AS TotalQuantity  
-                FROM OrderDetails  
-                WHERE OrderID = 15;
-            </TSQLQuery>  
-        </AssistantResponse>  
-    </Example> 
+{{$examples}} 
 </Examples>  
   
 ---  

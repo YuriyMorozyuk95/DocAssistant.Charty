@@ -2,7 +2,7 @@
 @if (_parsedAnswer.HasValue is true)
 {
     var answer = _parsedAnswer.Value;
-    var html = answer.AnswerHtml;
+    var html = Markdown.ToHtml(answer.AnswerHtml);
 
     <MudItem xs="12">
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true">
@@ -21,10 +21,6 @@
                                     var icon = citation.Name.EndsWith(".pdf")
                                         ? @Icons.Custom.FileFormats.FilePdf
                                         : null;
-                                    <MudChip Variant="Variant.Text" Color="Color.Info"
-                                             Icon="@icon" OnClick="@(_ => OnShowCitationAsync(citation))">
-                                        @($"{citation.Number}. {citation.Name}")
-                                    </MudChip>
                                 }
                             </div>
                         }
@@ -44,25 +40,37 @@
                     </MudPaper>
                 </ChildContent>
             </MudTabPanel>
-          @*       <MudTabPanel Icon="@Icons.Material.Filled.Lightbulb" Text="Thought process"
-                             ToolTip="Show thought process."
-                             Disabled="@(Retort is { Context.Thoughts: null } or { Context.Thoughts.Length: 0})">
-                    <ChildContent>
-                        <MudPaper Class="pa-6" Elevation="3">
-                            <pre style="white-space: normal; font-size: 1.2em;">
-                                @(RemoveLeadingAndTrailingLineBreaks(Retort.Context.ThoughtsString))
-                            </pre>
-                        </MudPaper>
-                    </ChildContent>
-                </MudTabPanel>
-                <MudTabPanel Icon="@Icons.Material.Filled.TextSnippet" Text="Supporting Content"
-                             ToolTip="Show the supporting content." Disabled="@(Retort is { Context.DataPoints.Text: null } or { Context.DataPoints.Text.Length: 0 })">
-                    <ChildContent>
-                        <MudPaper Class="pa-2" Elevation="3">
-                            <SupportingContent DataPoints="Retort.Context.DataPointsContent" Images="Retort.Context.DataPointsImages ?? []" />
-                        </MudPaper>
-                    </ChildContent>
-                </MudTabPanel> *@
+            <MudTabPanel Icon="@Icons.Material.Filled.TableChart" Text="Table Result" ToolTip="Show table result of" Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">  
+                <ChildContent>  
+                    <MudPaper Class="pa-6" Elevation="3">  
+                        <SupportingContent DataPoints="Retort.TableResult"/>  
+                    </MudPaper>  
+                </ChildContent>  
+            </MudTabPanel>  
+      
+            <MudTabPanel Icon="@Icons.Material.Filled.Code" Text="SQL Query" ToolTip="Show SQL queries" Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">  
+                <ChildContent>  
+                    <MudPaper Class="pa-6" Elevation="3">  
+                        <SupportingContent DataPoints="Retort.SqlQuery"/>  
+                    </MudPaper>  
+                </ChildContent>  
+            </MudTabPanel>  
+      
+            <MudTabPanel Icon="@Icons.Material.Filled.Explore" Text="Examples" ToolTip="Show examples" Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">  
+                <ChildContent>  
+                    <MudPaper Class="pa-6" Elevation="3">  
+                        <SupportingContent DataPoints="Retort.Examples"/>  
+                    </MudPaper>  
+                </ChildContent>  
+            </MudTabPanel>  
+      
+            <MudTabPanel Icon="@Icons.Material.Filled.Schema" Text="Schema" ToolTip="Show schema" Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">  
+                <ChildContent>  
+                    <MudPaper Class="pa-6" Elevation="3">  
+                        <SupportingContent DataPoints="Retort.Schema"/>  
+                    </MudPaper>  
+                </ChildContent>  
+            </MudTabPanel>
         </MudTabs>
     </MudItem>
 }

@@ -4,13 +4,12 @@ using DocAssistant.Charty.Ai.Services.Search;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-
 using Shared.Models;
 
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MinimalApi.Tests.Endpoint;
+namespace MinimalApi.Tests.Playground;
 
 public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -29,8 +28,9 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
     {
         var userPrompt = "List all customers' names and their emails.";
         var tableCount = 5;
+        var config = new DataBaseSearchConfig{ ResultsNumberLimit = tableCount };
 
-        var result = await _dataBaseSearchService.GetSchemas(userPrompt, tableCount);
+        var result = await _dataBaseSearchService.GetSchemas(userPrompt, config);
 
         Assert.NotNull(result);
         Assert.True(result.Count > 0);
@@ -57,14 +57,23 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
     public async Task ShouldTranslatePromptToSql(string input)
     {
         var count = 10;
-        var schemaResult = await _dataBaseSearchService.GetSchemas(input, 3);
+        var config = new DataBaseSearchConfig{ ResultsNumberLimit = count };
+
+        var schemaResult = await _dataBaseSearchService.GetSchemas(input, config);
         var schema = schemaResult.Values.First();
-        var result = await _dataBaseSearchService.TranslatePromptToQuery(input, schema, count, default);
+
+        var examples = await _dataBaseSearchService.GetExamples(input, config);
+
+        var result = await _dataBaseSearchService.TranslatePromptToQuery(input, schema, examples, count, default);
 
         _testOutputHelper.WriteLine("Generated SQL Query:");
         _testOutputHelper.WriteLine(result);
+
         _testOutputHelper.WriteLine("Schema:");
         _testOutputHelper.WriteLine(schema);
+
+        _testOutputHelper.WriteLine("Examples:");
+        _testOutputHelper.WriteLine(examples);
     }
 
     [Theory]
@@ -76,7 +85,7 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
     [InlineData("Get the list of all firewall rules.")]
     [InlineData("Show the products supplied by supplier with ID 3.")]
     [InlineData("Retrieve the names and phone numbers of all customers.")]
-    [InlineData("Get the total quantity of products ordered in order ID 15.")]
+    [InlineData("Get the total quantity of products ordered")]
     [InlineData("List all orders along with the customer names who placed them.")]
     public async Task CanSearchAndReturnSupportingContent(string userPrompt)
     {

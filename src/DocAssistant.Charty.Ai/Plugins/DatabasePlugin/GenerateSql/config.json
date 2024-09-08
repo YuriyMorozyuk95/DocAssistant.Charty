@@ -30,6 +30,11 @@
         "name": "schema",
         "description": "DDL database schema",
         "defaultValue": ""
+      },
+      {
+        "name": "examples",
+        "description": "examples of user prompts and sql result",
+        "defaultValue": ""
       }
     ]
   }

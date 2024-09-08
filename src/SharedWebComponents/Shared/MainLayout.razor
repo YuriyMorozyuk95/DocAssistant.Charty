@@ -13,7 +13,7 @@
 </HeadContent>
 <MudRTLProvider RightToLeft="IsRightToLeft">
     <MudLayout class="@(IsRightToLeft ? "rtl-lang" : "")">
-        <MudAppBar Elevation="20">
+        <MudAppBar Elevation="20" Color="@NavColor">
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
                         Title="Toggle navigation sidebar"
                         Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
@@ -45,10 +45,10 @@
         </MudAppBar>
         <MudDrawer @bind-Open="_drawerOpen" Elevation="5" id="drawer">
             <MudDrawerHeader>
-                <MudImage Src="favicon.png" Class="rounded filter-shadow" Alt="Blazor Logo" Width="30" Height="30" Elevation="0" />
+                <MudImage Src="DocAss_Logo.svg" Class="rounded filter-shadow" Alt="DocAssistant Logo" Width="30" Height="30" Elevation="0" />
                 <MudSpacer />
                 <MudText Typo="Typo.h5" Color=Color.Surface>
-                    Blazor OpenAI
+                    DocAssistant
                 </MudText>
             </MudDrawerHeader>
             <MudDivider Style="flex-grow: 0;" />

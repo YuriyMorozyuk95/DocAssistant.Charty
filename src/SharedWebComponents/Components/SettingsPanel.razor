@@ -1,35 +1,53 @@
-﻿
-<MudDrawer @bind-Open="@Open" Anchor="@Anchor.End" Elevation="5"
-           Variant="@DrawerVariant.Temporary" Width="25rem">
+﻿<MudDrawer @bind-Open="@Open" Anchor="@Anchor.End" Elevation="5" Variant="@DrawerVariant.Temporary" Width="25rem">
     <MudDrawerHeader>
-        <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Medium"
-                 Color="Color.Tertiary" Class="ma-1" />
+        <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Color="Color.Tertiary" Class="ma-1" />
         <MudText Typo="Typo.h5" Class="pl-2">
             Configure Answer Generation
         </MudText>
     </MudDrawerHeader>
     <MudExpansionPanels Style="margin: 10px;">
-
-        <MudExpansionPanel Text="DataWarehouse Search Setting">
+        <MudExpansionPanel IsExpanded="true" Text="DataWarehouse Search Setting">
             <MudForm>
-                <MudCheckBox @bind-Checked="@Settings.Overrides.DataBaseSearchConfig.IsEnabled" Size="Size.Large"
-                             Color="Color.Primary" Label="Enable Database Search" />
-
+                <MudCheckBox @bind-Checked="@Settings.Overrides.DataBaseSearchConfig.IsEnabled" Size="Size.Large" Color="Color.Primary" Label="Enable Database Search" />
                 <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.ResultsNumberLimit" Label="Count DataWarehouse search results" Variant="Variant.Outlined" />
                 <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.TableCount" Label="Table Count" Variant="Variant.Outlined" />
                 <MudTextField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.Query" Label="Query" Variant="Variant.Outlined" />
+
+                <MudSelect Value="_selectedServer" Label="Select Server" Variant="Variant.Outlined" T="Server" ValueChanged="OnSelectedServerChanged">
+                    @foreach (var server in _servers)
+                    {
+                        <MudSelectItem Value="@server">@server.ServerName</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" SelectedValues="_selectedDatabases" Label="Select Databases" Variant="Variant.Outlined" MultiSelection="true" SelectedValuesChanged="OnSelectedDatabasesChanged">
+                    @if (_selectedServer != null)
+                    {
+                        @foreach (var database in _selectedServer?.Databases)
+                        {
+                            <MudSelectItem Value="@database.DatabaseName">@database.DatabaseName</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" SelectedValues="_selectedTables" Label="Select Tables" Variant="Variant.Outlined" MultiSelection="true" SelectedValuesChanged="OnSelectedTableChanged">
+                    @if (_selectedDatabases != null)
+                    {
+                        @foreach (var database in _selectedServer?.Databases?.Where(db => _selectedDatabases?.Contains(db?.DatabaseName) ?? false))
+                        {
+                            @foreach (var table in database.Tables)
+                            {
+                                <MudSelectItem Value="@table">@table</MudSelectItem>
+                            }
+                        }
+                    }
+                </MudSelect>
             </MudForm>
         </MudExpansionPanel>
-
         <MudDivider DividerType="DividerType.Middle" Class="my-6" />
-
     </MudExpansionPanels>
-
     <div class="d-flex align-content-end flex-wrap flex-grow-1 pa-6">
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary"
-                   OnClick="@(_ => Open = !Open)" Size="Size.Large"
-                   StartIcon="@Icons.Material.Filled.Close"
-                   aria-label="Close setting panel button.">
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(_ => Open = !Open)" Size="Size.Large" StartIcon="@Icons.Material.Filled.Close" aria-label="Close setting panel button.">
             Close
         </MudButton>
     </div>

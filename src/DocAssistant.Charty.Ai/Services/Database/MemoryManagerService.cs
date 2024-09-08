@@ -13,18 +13,20 @@ public interface IMemoryManagerService
         TableSchema tableSchema,
         CancellationToken cancellationToken = default);
 
+
+    Task<string> UploadExampleToMemory(
+        Example example,
+        CancellationToken cancellationToken = default);
+
     Task RemoveDataBaseSchemaIndex();
 
-    //TODO add upload sql example to memory
-    //Task<TableSchema> UploadDataBaseSchemaToMemory(
-    //    TableSchema tableSchema,
-    //    CancellationToken cancellationToken = default);
-
+    Task RemoveExampleSchemaIndex();
 }
 
 public class MemoryManagerService : IMemoryManagerService
 {
     public const string DataBaseSchemaIndex = "database-schema-index";
+    public const string ExamplesIndex = "examples-index";
 
     private readonly string _containerName;
 
@@ -35,6 +37,7 @@ public class MemoryManagerService : IMemoryManagerService
     public MemoryManagerService(
         MemoryServerless memory,
         IConfiguration configuration,
+        IExampleService exampleService,
         BlobServiceClient blobServiceClient)
     {
         _memory = memory;
@@ -46,11 +49,13 @@ public class MemoryManagerService : IMemoryManagerService
        TableSchema tableSchema,
         CancellationToken cancellationToken = default)
     {
-        await CreateContainerIfNotExistAsync();
+        try
+        {
+            await CreateContainerIfNotExistAsync();
 
-        var id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
 
-        var tag = new TagCollection
+            var tag = new TagCollection
             {
                 { TagsKeys.Server, tableSchema.ServerName },
                 { TagsKeys.Database, tableSchema.DatabaseName },
@@ -58,21 +63,68 @@ public class MemoryManagerService : IMemoryManagerService
                 { TagsKeys.ConnectionString, tableSchema.ConnectionString }
             };
 
-        tableSchema.DocumentId = await _memory.ImportTextAsync(
-                          tableSchema.Schema,
-                          documentId: id,
-                          tags: tag,
-                          steps: new[]
-                                 {
+            tableSchema.DocumentId = await _memory.ImportTextAsync(
+                              tableSchema.Schema,
+                              documentId: id,
+                              tags: tag,
+                              steps: new[]
+                                     {
                                      Constants.PipelineStepsExtract,
                                      Constants.PipelineStepsPartition,
                                      "gen_embeddings_parallel",
                                      Constants.PipelineStepsSaveRecords
-                                 },
-                          index: DataBaseSchemaIndex,
-                          cancellationToken: cancellationToken);
+                                     },
+                              index: DataBaseSchemaIndex,
+                              cancellationToken: cancellationToken);
 
-        return tableSchema;
+            return tableSchema;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
+
+    public async Task<string> UploadExampleToMemory(
+        Example example,
+        CancellationToken cancellationToken = default)
+    {
+        await CreateContainerIfNotExistAsync();
+
+        var id = Guid.NewGuid().ToString();
+
+        var tag = new TagCollection
+                  {
+                      { TagsKeys.SqlExample, example.SqlExample },
+                  };
+
+        if (example.ServerName != null)
+        {
+            tag.Add(TagsKeys.Server, example.ServerName);
+        }
+        if (example.DatabaseNames.Any())
+        {
+            tag.Add(TagsKeys.Database, example.DatabaseNames.ToList());
+        }
+        if (example.TableNames.Any())
+        {
+            tag.Add(TagsKeys.Table, example.TableNames.ToList());
+        }
+
+        await _memory.ImportTextAsync(example.UserPromptExample,
+                                      documentId: id,
+                                      tags: tag,
+                                      steps: new[]
+                                             {
+                                                 Constants.PipelineStepsExtract,
+                                                 Constants.PipelineStepsPartition,
+                                                 "gen_embeddings_parallel",
+                                                 Constants.PipelineStepsSaveRecords
+                                             },
+                                      index: ExamplesIndex,
+                                      cancellationToken: cancellationToken);
+
+        return id;
     }
 
 
@@ -88,5 +140,10 @@ public class MemoryManagerService : IMemoryManagerService
     public async Task RemoveDataBaseSchemaIndex()
     {
         await _memory.DeleteIndexAsync(DataBaseSchemaIndex);
+    }
+
+    public async Task RemoveExampleSchemaIndex()
+    {
+        await _memory.DeleteIndexAsync(ExamplesIndex);
     }
 }

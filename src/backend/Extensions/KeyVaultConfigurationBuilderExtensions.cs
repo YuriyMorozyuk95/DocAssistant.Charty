@@ -9,6 +9,7 @@ internal static class KeyVaultConfigurationBuilderExtensions
         var azureKeyVaultEndpoint = Environment.GetEnvironmentVariable("AZURE_KEY_VAULT_ENDPOINT") ?? throw new InvalidOperationException("Azure Key Vault endpoint is not set.");
         ArgumentNullException.ThrowIfNullOrEmpty(azureKeyVaultEndpoint);
 
+        //TODO
         builder.AddAzureKeyVault(
             new Uri(azureKeyVaultEndpoint), new DefaultAzureCredential());
 

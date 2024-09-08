@@ -41,17 +41,21 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private readonly IDataBaseSearchService _dataBaseSearchService;
 
+    private readonly IExampleService _exampleService;
+
     public DocAssistantChatService(
         Kernel kernel,
         IConfiguration configuration,
         ILogger<DocAssistantChatService> logger,
         IMemorySearchService memorySearchService,
-        IDataBaseSearchService dataBaseSearchService)
+        IDataBaseSearchService dataBaseSearchService,
+        IExampleService exampleService)
     {
         _configuration = configuration;
         _logger = logger;
         _memorySearchService = memorySearchService;
         _dataBaseSearchService = dataBaseSearchService;
+        _exampleService = exampleService;
 
         _chatService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -64,7 +68,7 @@ public class DocAssistantChatService : IDocAssistantChatService
         var tokensSpent = 0;
         var searchTime = TimeSpan.Zero;
         var completionTime = TimeSpan.Zero;
-        var supportingContentList = new List<SupportingContent>();
+        var supportingContentList = new List<SupportingContentDto>();
 
         try
         {
@@ -112,6 +116,9 @@ public class DocAssistantChatService : IDocAssistantChatService
             //                ? ((CompletionsUsage)answerChatMessageContent.Metadata["Usage"]).TotalTokens
             //                : 0;
 
+
+            PrepareSupportingContentForClient(supportingContentList);
+
             var responseMessage = new ResponseMessage("assistant", answer);
             var responseContext = new ResponseContext(
                 DataPointsContent: documentContentList.Select(x => new SupportingContentRecord(x.Title, x.Content)).ToArray(),
@@ -121,7 +128,7 @@ public class DocAssistantChatService : IDocAssistantChatService
                 Index: 0,
                 Message: responseMessage,
                 Context: responseContext,
-                CitationBaseUrl: _configuration.ToCitationBaseUrl());
+                DataPoints: supportingContentList.ToArray());
 
             return new ChatAppResponse(new[] { choice });
         }
@@ -135,9 +142,24 @@ public class DocAssistantChatService : IDocAssistantChatService
         }
     }
 
-    private async Task<List<SupportingContent>> GetSupportingContent(string lastQuestion, RequestOverrides requestOverrides, CancellationToken cancellationToken = default)
+    private void PrepareSupportingContentForClient(List<SupportingContentDto> supportingContentList)
     {
-        List<SupportingContent> supportingContentList = [];
+        var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples);
+        foreach(var example in examples)
+        {
+            example.Content = _exampleService.TranslateXmlToMarkdown(example.Content);
+        }
+
+        var tableResults = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult);
+        foreach(var table in tableResults)
+        {
+            table.Content = table.Content?.Replace("\n", "<br>") ?? string.Empty;
+        }
+    }
+
+    private async Task<List<SupportingContentDto>> GetSupportingContent(string lastQuestion, RequestOverrides requestOverrides, CancellationToken cancellationToken = default)
+    {
+        List<SupportingContentDto> supportingContentList = [];
 
         var supportingContents = await _dataBaseSearchService.Search(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
 
@@ -212,7 +234,7 @@ public class DocAssistantChatService : IDocAssistantChatService
         return systemMessageBuilder.ToString();
     }
 
-    private string GetDocumentContents(ICollection<SupportingContent> documentContentList)
+    private string GetDocumentContents(ICollection<SupportingContentDto> documentContentList)
     {
         string documentContents
             ;

@@ -2,6 +2,8 @@
 
 using System.Text.Json.Serialization;
 
+using DocAssistant.Charty.Ai;
+
 namespace Shared.Models;
 
 public record SupportingContentRecord(string Title, string Content);
@@ -37,11 +39,12 @@ public record ResponseChoice(
     [property: JsonPropertyName("index")] int Index,
     [property: JsonPropertyName("message")] ResponseMessage Message,
     [property: JsonPropertyName("context")] ResponseContext Context,
-    [property: JsonPropertyName("citationBaseUrl")] string CitationBaseUrl)
+    [property: JsonPropertyName("supportingContent")] SupportingContentDto[] DataPoints)
 {
-    //[JsonPropertyName("content_filter_results")]
-    //public ContentFilterResult? ContentFilterResult { get; set; }
-
+    public SupportingContentDto[] TableResult => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.TableResult).ToArray();
+    public SupportingContentDto[] SqlQuery => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.SqlQuery)?.ToArray();
+    public SupportingContentDto[] Examples => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.Examples)?.ToArray();
+    public SupportingContentDto[] Schema => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.Schema)?.ToArray();
 }
 
 public record ChatAppResponse(ResponseChoice[] Choices);

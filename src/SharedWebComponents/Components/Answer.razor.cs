@@ -14,7 +14,7 @@ public sealed partial class Answer
     protected override void OnParametersSet()
     {
         _parsedAnswer = ParseAnswerToHtml(
-            Retort.Message.Content, Retort.CitationBaseUrl);
+            Retort.Message.Content);
 
         base.OnParametersSet();
     }
@@ -26,8 +26,6 @@ public sealed partial class Answer
             await FollowupQuestionClicked.InvokeAsync(followupQuestion);
         }
     }
-    private ValueTask OnShowCitationAsync(CitationDetails citation) => PdfViewer.ShowDocument(citation.Name, citation.BaseUrl);
-
     private MarkupString RemoveLeadingAndTrailingLineBreaks(string input) => (MarkupString)HtmlLineBreakRegex().Replace(input, "");
 
     [GeneratedRegex("^(\\s*<br\\s*/?>\\s*)+|(\\s*<br\\s*/?>\\s*)+$", RegexOptions.Multiline)]

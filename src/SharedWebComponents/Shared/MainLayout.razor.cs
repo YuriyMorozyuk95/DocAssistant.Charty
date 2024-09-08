@@ -1,5 +1,7 @@
 ﻿
 
+using MudBlazor.Utilities;
+
 namespace SharedWebComponents.Shared;
 
 public sealed partial class MainLayout
@@ -8,6 +10,25 @@ public sealed partial class MainLayout
     private bool _drawerOpen = true;
     private bool _settingsOpen = false;
     private SettingsPanel? _settingsPanel;
+
+    public MainLayout()
+    {
+        _theme.Palette.Primary = DocAssistantColors.Primary;
+        _theme.PaletteDark.Primary = DocAssistantColors.Primary;
+
+        _theme.Palette.Secondary = DocAssistantColors.Secondary;
+        _theme.PaletteDark.Secondary = DocAssistantColors.Secondary;
+
+        _theme.Typography = new MudBlazor.Typography()
+                            {
+                                Default = new Default()
+                                          {
+                                              FontFamily = new[] { "Segoe UI", "-apple-system", "BlinkMacSystemFont", "Roboto", "sans-serif" }
+                                          }
+                            };
+    }
+
+    public Color NavColor => IsDarkTheme ? Color.Dark : Color.Primary;
 
     private bool IsDarkTheme
     {
@@ -45,4 +66,11 @@ public sealed partial class MainLayout
     private void OnThemeChanged() => IsDarkTheme = !IsDarkTheme;
 
     private void OnIsReversedChanged() => IsReversed = !IsReversed;
+
+    public static class DocAssistantColors
+    {
+        public static MudColor Primary => new MudColor("#005f9f");
+
+        public static MudColor Secondary => new MudColor("#005a72");
+    }
 }

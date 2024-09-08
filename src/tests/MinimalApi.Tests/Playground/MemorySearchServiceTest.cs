@@ -30,11 +30,13 @@ namespace MinimalApi.Tests.Playground
         public async Task SearchDataBaseSchema_ReturnsExpectedResults(string userPrompt)  
         {  
             // Arrange  
-            int supportingContentCount = 500;  
+            int supportingContentCount = 500;
+            var config = new DataBaseSearchConfig{ ResultsNumberLimit = supportingContentCount };
             CancellationToken cancellationToken = CancellationToken.None;  
-  
+
+            
             // Act  
-            var results = _memorySearchService.SearchDataBaseSchema(userPrompt, supportingContentCount, cancellationToken);  
+            var results = _memorySearchService.SearchDataBaseSchema(userPrompt, config, cancellationToken);  
             var resultList = await results.ToListAsync(cancellationToken: cancellationToken);  
 
             

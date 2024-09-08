@@ -1,10 +1,12 @@
 ﻿
 
+using DocAssistant.Charty.Ai;
+
 namespace SharedWebComponents.Components;
 
 public sealed partial class SupportingContent
 {
-    internal static ParsedSupportingContentItem ParseSupportingContent(SupportingContentRecord item)
+    internal static ParsedSupportingContentItem ParseSupportingContent(SupportingContentDto item)
     {
         // Assumes the item starts with the file name followed by : and the content.
         // Example: "sdp_corporate.pdf: this is the content that follows".

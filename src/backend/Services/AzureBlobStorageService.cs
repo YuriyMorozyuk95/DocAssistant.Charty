@@ -2,8 +2,6 @@
 
 internal sealed class AzureBlobStorageService(BlobContainerClient container)
 {
-    internal static DefaultAzureCredential DefaultCredential { get; } = new();
-
     internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken)
     {
         try
