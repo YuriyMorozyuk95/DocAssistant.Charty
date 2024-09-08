@@ -39,26 +39,32 @@ namespace DocAssistant.Charty.Ai.Services.CodeInterpreter
                             .WithCodeInterpreter()  
                             .BuildAsync();  
   
-            var mergedPrompt = GenerateChartDescription(userPrompt, markdownTable);  
+            var mergedPrompt = GenerateChartDescription(userPrompt, markdownTable);
+
             try  
             {  
                 var thread = await agent.NewThreadAsync();  
                 var imageName = Guid.NewGuid().ToString();  
                 var imageUrl = await InvokeAgentAsync(agent, thread, imageName, mergedPrompt);  
   
-                return new SupportingContentDto  
-                {  
-                    Title = "Generated Chart",  
-                    Content = "Chart generated based on the provided data and prompt.",  
-                    OriginUri = imageUrl,  
-                    SupportingContentType = SupportingContentType.Charts  
-                };  
+                var contentDto = new SupportingContentDto  
+                                 {  
+                                     Title = "Generated Chart",  
+                                     OriginUri = imageUrl,  
+                                     SupportingContentType = SupportingContentType.Charts  
+                                 };  
+  
+                // Generate the image HTML tag and set it as the Content  
+                contentDto.Content = GenerateImageHtmlTag(contentDto);  
+  
+                return contentDto;  
             }  
             finally  
             {  
                 await agent.DeleteAsync();  
             }  
         }  
+
   
         private async Task<string> InvokeAgentAsync(IAgent agent, IAgentThread thread, string imageName, string question)  
         {  
