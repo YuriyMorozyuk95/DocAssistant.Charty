@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 using Shared.Models;
 using DocAssistant.Charty.Ai.Extensions;
+using Azure;
 
 namespace DocAssistant.Charty.Ai.Services.Database;
 
@@ -207,13 +208,23 @@ public class MemorySearchService : IMemorySearchService
             Select = { "*" } // Select all fields  
         };
 
-        SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", options);
+        SearchResults<SearchDocument> results = null;
+        try
+        {
+            results = await searchClient.SearchAsync<SearchDocument>("*", options);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Handle specific Azure Search exceptions  
+            _logger.LogError($"Azure Search error: {ex.Message}");
+            yield break;
+        }
 
-        // Assert that results are not null  
-        // Create a list to hold the table schemas  
-        var tableSchemas = new List<TableSchema>();
+        if (results == null)
+        {
+            yield break;
+        }
 
-        // Iterate through the results and assert each document is not null  
         await foreach (SearchResult<SearchDocument> result in results.GetResultsAsync())
         {
             string serverName = null;
@@ -225,7 +236,6 @@ public class MemorySearchService : IMemorySearchService
             if (result.Document.TryGetValue("tags", out var tags))
             {
                 var tagsArray = ((object[])tags).Skip(6).Cast<string>().ToArray();
-                
                 serverName = tagsArray.GetTagValue(TagsKeys.Server);
                 databaseName = tagsArray.GetTagValue(TagsKeys.Database);
                 tableName = tagsArray.GetTagValue(TagsKeys.Table);
@@ -234,14 +244,21 @@ public class MemorySearchService : IMemorySearchService
 
             if (result.Document.TryGetValue("payload", out var payload))
             {
-                using JsonDocument document = JsonDocument.Parse(payload.ToString());
-                // Get the root element  
-                JsonElement root = document.RootElement;
-
-                // Get the value of the "text" property  
-                if (root.TryGetProperty("text", out JsonElement textElement))
+                try
                 {
-                    schema = textElement.GetString();
+                    using JsonDocument document = JsonDocument.Parse(payload.ToString());
+                    // Get the root element  
+                    JsonElement root = document.RootElement;
+                    // Get the value of the "text" property  
+                    if (root.TryGetProperty("text", out JsonElement textElement))
+                    {
+                        schema = textElement.GetString();
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    // Handle JSON parsing errors  
+                    Console.WriteLine($"JSON parsing error: {ex.Message}");
                 }
             }
 
@@ -271,7 +288,22 @@ public class MemorySearchService : IMemorySearchService
             Select = { "*" }
         };
 
-        SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", options);
+        SearchResults<SearchDocument> results = null;
+        try
+        {
+            results = await searchClient.SearchAsync<SearchDocument>("*", options);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Handle specific Azure Search exceptions  
+            Console.WriteLine($"Azure Search error: {ex.Message}");
+            yield break;
+        }
+
+        if (results == null)
+        {
+            yield break;
+        }
 
         await foreach (SearchResult<SearchDocument> result in results.GetResultsAsync())
         {
@@ -284,7 +316,6 @@ public class MemorySearchService : IMemorySearchService
             if (result.Document.TryGetValue("tags", out var tags))
             {
                 var tagsArray = ((object[])tags).Skip(6).Cast<string>().ToArray();
-
                 sqlExample = tagsArray.GetTagValue(TagsKeys.SqlExample);
                 serverName = tagsArray.GetTagValue(TagsKeys.Server);
                 databaseName = tagsArray.GetTagValues(TagsKeys.Database);
@@ -293,12 +324,19 @@ public class MemorySearchService : IMemorySearchService
 
             if (result.Document.TryGetValue("payload", out var payload))
             {
-                using JsonDocument document = JsonDocument.Parse(payload.ToString());
-                JsonElement root = document.RootElement;
-
-                if (root.TryGetProperty("text", out JsonElement textElement))
+                try
                 {
-                    userPromptExample = textElement.GetString();
+                    using JsonDocument document = JsonDocument.Parse(payload.ToString());
+                    JsonElement root = document.RootElement;
+                    if (root.TryGetProperty("text", out JsonElement textElement))
+                    {
+                        userPromptExample = textElement.GetString();
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    // Handle JSON parsing errors  
+                    Console.WriteLine($"JSON parsing error: {ex.Message}");
                 }
             }
 
@@ -307,12 +345,11 @@ public class MemorySearchService : IMemorySearchService
                 DocumentId = result.Document["id"].ToString(),
                 ServerName = serverName,
                 DatabaseNames = databaseName,
-                TableNames = tableName.ToList(),
+                TableNames = tableName?.ToList(), // Ensure tableName is not null before calling ToList()  
                 SqlExample = sqlExample,
                 UserPromptExample = userPromptExample,
             };
         }
     }
 
-    
 }

@@ -136,7 +136,7 @@ namespace DocAssistant.Charty.Ai.Services.CodeInterpreter
                 throw new ArgumentException("Invalid SupportingContentDto provided.");  
             }  
   
-            return $"<img src=\"{contentDto.OriginUri}\" alt=\"{contentDto.Title}\" />";  
+            return $"<img src=\"{contentDto.OriginUri}\" alt=\"{contentDto.Title}\" width=\"78%\" height=\"78%\" />";  
         }  
     }  
 }  

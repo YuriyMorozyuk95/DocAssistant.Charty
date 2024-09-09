@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
-using Azure.AI.OpenAI;
 
 using DocAssistant.Charty.Ai.Extensions;
 using DocAssistant.Charty.Ai.Services.CodeInterpreter;
@@ -13,8 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.KernelMemory.AI.OpenAI;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-
 using Microsoft.SemanticKernel;
 using DocAssistant.Charty.Ai.Services.Search;
 
@@ -106,9 +99,7 @@ public class DocAssistantChatService : IDocAssistantChatService
 
             var answerChatMessageContent = chatMessageContents[0];
 
-            var answer = answerChatMessageContent.Content;
-
-            await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answer);
+            var answer = await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answerChatMessageContent.Content);
 
             var responseMessage = new ResponseMessage("assistant", answer);
             var responseContext = new ResponseContext(
@@ -133,17 +124,15 @@ public class DocAssistantChatService : IDocAssistantChatService
         }
     }
 
-    private async Task PrepareSupportingContentForClient(ICollection<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
+    private async Task<string> PrepareSupportingContentForClient(ICollection<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
     {
         var tableResult = supportingContentList.FirstOrDefault(x => x.SupportingContentType == SupportingContentType.TableResult)?.Content;
 
+        SupportingContentDto supportingCharts = null;
+
         if (tableResult != null)
         {
-            var supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResult);
-
-            var stringBuilder = new StringBuilder(answer);
-            stringBuilder.AppendLine(supportingCharts.Content);
-
+            supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResult);
             supportingContentList.Add(supportingCharts);
         }
 
@@ -152,6 +141,16 @@ public class DocAssistantChatService : IDocAssistantChatService
         {
             example.Content = _exampleService.TranslateXmlToMarkdown(example.Content);
         }
+
+        if(supportingCharts != null)
+        {
+            var stringBuilder = new StringBuilder(answer);
+            stringBuilder.AppendLine(supportingCharts.Content);
+
+            return stringBuilder.ToString();
+        }
+
+        return answer;
     }
 
     private async Task<List<SupportingContentDto>> GetSupportingContent(string lastQuestion, RequestOverrides requestOverrides, CancellationToken cancellationToken = default)
