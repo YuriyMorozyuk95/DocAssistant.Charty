@@ -145,6 +145,7 @@ public class DocAssistantChatService : IDocAssistantChatService
         if(supportingCharts != null)
         {
             var stringBuilder = new StringBuilder(answer);
+            stringBuilder.AppendLine("<br />");
             stringBuilder.AppendLine(supportingCharts.Content);
 
             return stringBuilder.ToString();
