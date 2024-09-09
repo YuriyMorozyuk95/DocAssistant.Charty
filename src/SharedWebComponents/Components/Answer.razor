@@ -71,6 +71,16 @@
                     </MudPaper>  
                 </ChildContent>  
             </MudTabPanel>
+
+
+            <MudTabPanel Icon="@Icons.Material.Filled.BarChart" Text="Schema" ToolTip="Show charts" Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">  
+                <ChildContent>  
+                    <MudPaper Class="pa-6" Elevation="3">  
+                        <SupportingContent DataPoints="Retort.Charts"/>  
+                    </MudPaper>  
+                </ChildContent>  
+            </MudTabPanel>
+
         </MudTabs>
     </MudItem>
 }

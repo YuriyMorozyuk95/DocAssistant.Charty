@@ -43,6 +43,7 @@ public record ResponseChoice(
     public SupportingContentDto[] SqlQuery => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.SqlQuery)?.ToArray();
     public SupportingContentDto[] Examples => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.Examples)?.ToArray();
     public SupportingContentDto[] Schema => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.Schema)?.ToArray();
+    public SupportingContentDto[] Charts => DataPoints.Where(x => x.SupportingContentType == SupportingContentType.Charts)?.ToArray();
 }
 
 public record ChatAppResponse(ResponseChoice[] Choices);

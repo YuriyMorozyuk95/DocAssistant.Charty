@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 
 using DocAssistant.Charty.Ai.Extensions;
+using DocAssistant.Charty.Ai.Services.CodeInterpreter;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -37,25 +38,25 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private readonly int _maxTokens;
 
-    private readonly IMemorySearchService _memorySearchService;
-
     private readonly IDataBaseSearchService _dataBaseSearchService;
 
     private readonly IExampleService _exampleService;
+
+    private readonly ICodeInterpreterAgentService _codeInterpreterAgentService;
 
     public DocAssistantChatService(
         Kernel kernel,
         IConfiguration configuration,
         ILogger<DocAssistantChatService> logger,
-        IMemorySearchService memorySearchService,
         IDataBaseSearchService dataBaseSearchService,
-        IExampleService exampleService)
+        IExampleService exampleService,
+        ICodeInterpreterAgentService codeInterpreterAgentService)
     {
         _configuration = configuration;
         _logger = logger;
-        _memorySearchService = memorySearchService;
         _dataBaseSearchService = dataBaseSearchService;
         _exampleService = exampleService;
+        _codeInterpreterAgentService = codeInterpreterAgentService;
 
         _chatService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -92,12 +93,6 @@ public class DocAssistantChatService : IDocAssistantChatService
 
             var chatHistory = await ChatTurnToChatHistory(history, mergedSupportingContents, cancellationToken);
 
-            //var setting = (overrides.SearchParameters != null) ? new OpenAIPromptExecutionSettings()
-            //{
-            //    MaxTokens = request.SearchParameters.MaxResponse,
-            //    Temperature = request.SearchParameters.Temperature,
-            //} : null;
-
             var chatServiceStopwatch = Stopwatch.StartNew();
             var chatMessageContents = await _chatService.GetChatMessageContentsAsync(chatHistory, null, cancellationToken: cancellationToken);
             completionTime = TimeSpan.FromMilliseconds(chatServiceStopwatch.ElapsedMilliseconds);
@@ -112,12 +107,8 @@ public class DocAssistantChatService : IDocAssistantChatService
             var answerChatMessageContent = chatMessageContents[0];
 
             var answer = answerChatMessageContent.Content;
-            //tokensSpent = answerChatMessageContent.Metadata != null && answerChatMessageContent.Metadata.ContainsKey("Usage")
-            //                ? ((CompletionsUsage)answerChatMessageContent.Metadata["Usage"]).TotalTokens
-            //                : 0;
 
-
-            PrepareSupportingContentForClient(supportingContentList);
+            await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answer);
 
             var responseMessage = new ResponseMessage("assistant", answer);
             var responseContext = new ResponseContext(
@@ -142,18 +133,24 @@ public class DocAssistantChatService : IDocAssistantChatService
         }
     }
 
-    private void PrepareSupportingContentForClient(List<SupportingContentDto> supportingContentList)
+    private async Task PrepareSupportingContentForClient(ICollection<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
     {
+        var tableResult = supportingContentList.FirstOrDefault(x => x.SupportingContentType == SupportingContentType.TableResult)?.Content;
+
+        if (tableResult != null)
+        {
+            var supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResult);
+
+            var stringBuilder = new StringBuilder(answer);
+            stringBuilder.AppendLine(supportingCharts.Content);
+
+            supportingContentList.Add(supportingCharts);
+        }
+
         var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples);
         foreach(var example in examples)
         {
             example.Content = _exampleService.TranslateXmlToMarkdown(example.Content);
-        }
-
-        var tableResults = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult);
-        foreach(var table in tableResults)
-        {
-            table.Content = table.Content?.Replace("\n", "<br>") ?? string.Empty;
         }
     }
 
