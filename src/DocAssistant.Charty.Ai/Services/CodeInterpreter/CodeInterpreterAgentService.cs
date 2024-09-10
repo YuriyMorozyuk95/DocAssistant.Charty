@@ -58,7 +58,16 @@ namespace DocAssistant.Charty.Ai.Services.CodeInterpreter
                 contentDto.Content = GenerateImageHtmlTag(contentDto);  
   
                 return contentDto;  
-            }  
+            }
+            catch(Exception e)
+            {
+                return new SupportingContentDto  
+                {  
+                    Title = "Generated Chart",  
+                    OriginUri = "Not able to generate chart for this prompt",  
+                    SupportingContentType = SupportingContentType.Charts  
+                };
+            }
             finally  
             {  
                 await agent.DeleteAsync();  
