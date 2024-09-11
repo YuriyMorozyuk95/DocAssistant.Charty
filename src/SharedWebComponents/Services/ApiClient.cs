@@ -24,7 +24,7 @@ public sealed class ApiClient(HttpClient httpClient)
             {
                 continue;
             }
-            await Task.Delay(1, cancellationToken);
+            await Task.Delay(300, cancellationToken);
             yield return example;
         }
     }
@@ -64,7 +64,7 @@ public sealed class ApiClient(HttpClient httpClient)
                 continue;
             }
 
-            await Task.Delay(1, cancellationToken);
+            await Task.Delay(300, cancellationToken);
             yield return logMessage;
         }
     }
@@ -85,7 +85,7 @@ public sealed class ApiClient(HttpClient httpClient)
                 continue;
             }
 
-            await Task.Delay(1, cancellationToken);
+            await Task.Delay(300, cancellationToken);
             yield return schema;
         }
     }
