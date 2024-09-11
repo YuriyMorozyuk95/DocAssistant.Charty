@@ -4,6 +4,7 @@ using System.Net;
 using DocAssistant.Charty.Ai;
 
 using NLog;
+using NLog.Extensions.Logging;
 using NLog.Web;
 
 using Shared.Json;
@@ -14,7 +15,7 @@ namespace MinimalApi
     {
         public static void Main(string[] args)
         {
-            LogManager.Setup().LoadConfigurationFromAppSettings();
+
             var logger = LogManager.GetCurrentClassLogger();
             try
             {
@@ -26,6 +27,9 @@ namespace MinimalApi
                 };
 
                 var builder = WebApplication.CreateBuilder(args);
+
+                NLog.LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));
+
                 //builder.Configuration.ConfigureAzureKeyVault();  
 
                 // See: https://aka.ms/aspnetcore/swashbuckle  
