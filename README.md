@@ -58,7 +58,7 @@ DocAssistant.Charty is a powerful, adaptable tool designed to help users harness
 
 ## Project Team:  
    
-Yurii Moroziuk – Project Lead /.Net AI Developer 
+Yurii Moroziuk – Project Lead /.Net AI Developer   
 E-mail: Yurii.Moroziuk@hotmail.com  
 Credly: https://www.credly.com/users/yurii-moroziuk/badges  
 GitHub: https://github.com/YuriyMorozyuk95  
