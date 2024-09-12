@@ -55,3 +55,20 @@ DocAssistant.Charty is an advanced AI-powered data management and analytics tool
 **Conclusion:**  
    
 DocAssistant.Charty is a powerful, adaptable tool designed to help users harness the power of their data. Whether you are a business owner looking to gain insights into your operations or an individual seeking to analyze your financial data, DocAssistant.Charty provides the tools you need to make informed, data-driven decisions.  
+
+## Project Team:  
+   
+Yurii Moroziuk – Project Lead /.Net AI Developer 
+E-mail: Yurii.Moroziuk@hotmail.com  
+Credly: https://www.credly.com/users/yurii-moroziuk/badges  
+GitHub: https://github.com/YuriyMorozyuk95  
+  
+Khrystyna Halytska - .Net AI Developer  
+E-mail: christinaozarko@gmail.com  
+Credly: https://www.credly.com/users/khrystyna-ozarko  
+GitHub: https://github.com/KhrystynaOX  
+
+Igor Shurygin - Business Analysis, AI Prompt Engineer, Video Design  
+E-mail: yottaimusic@gmail.com  
+Credly: https://www.credly.com/users/igor-shurygin
+GitHub: https://github.com/ishurygin
