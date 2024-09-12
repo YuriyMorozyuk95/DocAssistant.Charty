@@ -70,5 +70,5 @@ GitHub: https://github.com/KhrystynaOX
 
 Igor Shurygin - Business Analysis, AI Prompt Engineer, Video Design  
 E-mail: yottaimusic@gmail.com  
-Credly: https://www.credly.com/users/igor-shurygin
+Credly: https://www.credly.com/users/igor-shurygin  
 GitHub: https://github.com/ishurygin
