@@ -31,7 +31,7 @@ namespace MinimalApi.Tests.Playground
         {  
             // Arrange  
             int supportingContentCount = 500;
-            var config = new DataBaseSearchConfig{ ResultsNumberLimit = supportingContentCount };
+            var config = new DataBaseSearchConfig{ RowLimit = supportingContentCount };
             CancellationToken cancellationToken = CancellationToken.None;  
 
             

@@ -28,7 +28,7 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
     {
         var userPrompt = "List all customers' names and their emails.";
         var tableCount = 5;
-        var config = new DataBaseSearchConfig{ ResultsNumberLimit = tableCount };
+        var config = new DataBaseSearchConfig{ RowLimit = tableCount };
 
         var result = await _dataBaseSearchService.GetSchemas(userPrompt, config);
 
@@ -57,7 +57,7 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
     public async Task ShouldTranslatePromptToSql(string input)
     {
         var count = 10;
-        var config = new DataBaseSearchConfig{ ResultsNumberLimit = count };
+        var config = new DataBaseSearchConfig{ RowLimit = count };
 
         var schemaResult = await _dataBaseSearchService.GetSchemas(input, config);
         var schema = schemaResult.Values.First();
@@ -92,7 +92,7 @@ public class DataBaseSearchServiceTests : IClassFixture<WebApplicationFactory<Pr
         var config = new DataBaseSearchConfig
         {
             TableCount = 10,
-            ResultsNumberLimit = 100,
+            RowLimit = 100,
         };
 
         var result = await _dataBaseSearchService.Search(userPrompt, config);

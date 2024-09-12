@@ -126,14 +126,17 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private async Task<string> PrepareSupportingContentForClient(ICollection<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
     {
-        var tableResult = supportingContentList.FirstOrDefault(x => x.SupportingContentType == SupportingContentType.TableResult)?.Content;
+        var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content);
 
         SupportingContentDto supportingCharts = null;
 
-        if (tableResult != null)
+        foreach (var tableResultPerDb in tableResult)
         {
-            supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResult);
-            supportingContentList.Add(supportingCharts);
+            if (tableResultPerDb != null)
+            {
+                supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResultPerDb);
+                supportingContentList.Add(supportingCharts);
+            }
         }
 
         var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples);

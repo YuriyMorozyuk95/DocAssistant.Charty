@@ -74,10 +74,10 @@ public class DataBaseSearchService : IDataBaseSearchService
         {  
             AddSchemaContent(supportingContent, schema);  
   
-            config.Query = await TranslatePromptToQuery(userPrompt, schema.Value, examples, config.ResultsNumberLimit, cancellationToken);  
+            config.Query = await TranslatePromptToQuery(userPrompt, schema.Value, examples, config.RowLimit, cancellationToken);  
             AddSqlQueryContent(supportingContent, config.Query);  
   
-            var tableResult = await _sqlExecutorService.GetHtmlTable(schema.Key, config.Query, config.ResultsNumberLimit, cancellationToken);  
+            var tableResult = await _sqlExecutorService.GetHtmlTable(schema.Key, config.Query, config.RowLimit, cancellationToken);  
             AddTableResultContent(supportingContent, tableResult);  
         }  
     }  
@@ -85,8 +85,9 @@ public class DataBaseSearchService : IDataBaseSearchService
     private async Task ProcessExistingQuery(DataBaseSearchConfig config, List<SupportingContentDto> supportingContent, CancellationToken cancellationToken)  
     {  
         var database = config.DatabaseFilter.FirstOrDefault();  
-        var connectionString = await _dataBaseRegistryService.GetConnectionStringByDatabaseName(database);  
-        var tableResult = await _sqlExecutorService.GetHtmlTable(connectionString, config.Query, config.ResultsNumberLimit, cancellationToken);  
+        var connectionString = await _dataBaseRegistryService.GetConnectionStringByDatabaseName(database);
+        
+        var tableResult = await _sqlExecutorService.GetHtmlTable(connectionString, config.Query, config.RowLimit, cancellationToken);  
         AddTableResultContent(supportingContent, tableResult);  
     }  
   

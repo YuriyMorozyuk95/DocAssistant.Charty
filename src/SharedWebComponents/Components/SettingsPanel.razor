@@ -9,7 +9,7 @@
         <MudExpansionPanel IsExpanded="true" Text="DataWarehouse Search Setting">
             <MudForm>
                 <MudCheckBox @bind-Checked="@Settings.Overrides.DataBaseSearchConfig.IsEnabled" Size="Size.Large" Color="Color.Primary" Label="Enable Database Search" />
-                <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.ResultsNumberLimit" Label="Count DataWarehouse search results" Variant="Variant.Outlined" />
+                <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.RowLimit" Label="Table row limit" Variant="Variant.Outlined" />
                 <MudNumericField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.TableCount" Label="Table Count" Variant="Variant.Outlined" />
                 <MudTextField @bind-Value="@Settings.Overrides.DataBaseSearchConfig.Query" Label="Query" Variant="Variant.Outlined" />
 
