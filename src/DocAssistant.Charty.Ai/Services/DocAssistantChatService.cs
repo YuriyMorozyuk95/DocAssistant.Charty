@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text;
 
 using DocAssistant.Charty.Ai.Extensions;
@@ -124,9 +124,9 @@ public class DocAssistantChatService : IDocAssistantChatService
         }
     }
 
-    private async Task<string> PrepareSupportingContentForClient(ICollection<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
+    private async Task<string> PrepareSupportingContentForClient(List<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
     {
-        var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content);
+        var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content).ToList();
 
         SupportingContentDto supportingCharts = null;
 
@@ -139,7 +139,7 @@ public class DocAssistantChatService : IDocAssistantChatService
             }
         }
 
-        var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples);
+        var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples).ToList();
         foreach(var example in examples)
         {
             example.Content = _exampleService.TranslateXmlToMarkdown(example.Content);
