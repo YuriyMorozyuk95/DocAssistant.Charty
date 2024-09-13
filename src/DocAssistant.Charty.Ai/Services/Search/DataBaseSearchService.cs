@@ -217,6 +217,4 @@ public class DataBaseSearchService : IDataBaseSearchService
 
         return schemasPerDatabase;
     }
-
-
 }

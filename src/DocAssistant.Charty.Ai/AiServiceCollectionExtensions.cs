@@ -120,12 +120,11 @@ public static class AiServiceCollectionExtensions
         services.AddScoped<IMemoryManagerService, MemoryManagerService>();
         services.AddScoped<IMemorySearchService, MemorySearchService>();
         services.AddScoped<IDataBaseSearchService, DataBaseSearchService>();
+        services.AddScoped<IDataBaseInsertService, DataBaseInsertService>();
+
         services.AddScoped<ISqlExecutorService, SqlExecutorService>();
         services.AddScoped<IDocAssistantChatService, DocAssistantChatService>();
         services.AddScoped<IDataBaseRegistryService, DataBaseRegistryService>();
-
         services.AddScoped<ICodeInterpreterAgentService, CodeInterpreterAgentService>();
-
-        
     }
 }

@@ -26,7 +26,7 @@ public class IntentServiceTests : IClassFixture<WebApplicationFactory<Program>>
     [InlineData("List all customers' names and their emails.", Intent.Query)]  
     [InlineData("Insert new customer record.", Intent.Insert)]  
     [InlineData("Create a new table for orders.", Intent.Create)]  
-    [InlineData("Unrecognized operation.", Intent.Default)]  
+    [InlineData("Hi.", Intent.Default)]  
     public async Task CheckIntent_Should_ReturnCorrectIntent(string input, Intent expectedIntent)  
     {  
         // Act  

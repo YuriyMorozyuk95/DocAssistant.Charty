@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "Translate the user prompt to a T-SQL insert script for Azure SQL Server.",
+  "completion": {
+    "max_tokens": 600,
+    "temperature": 0.1,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  },
+  "input": {
+    "parameters": [
+      {
+        "name": "input",
+        "description": "The user's request.",
+        "defaultValue": ""
+      },
+      {
+        "name": "dateTime",
+        "description": "Current Date and Time",
+        "defaultValue": ""
+      },
+      {
+        "name": "schema",
+        "description": "DDL database schema",
+        "defaultValue": ""
+      },
+      {
+        "name": "examples",
+        "description": "Examples of user prompts and T-SQL insert scripts",
+        "defaultValue": ""
+      }
+    ]
+  }
+}  

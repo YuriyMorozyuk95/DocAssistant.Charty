@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 using DocAssistant.Charty.Ai.Extensions;
@@ -37,19 +37,27 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private readonly ICodeInterpreterAgentService _codeInterpreterAgentService;
 
+    private readonly IDataBaseInsertService _dataBaseInsertService;
+
+    private readonly IIntentService _intentService;
+
     public DocAssistantChatService(
         Kernel kernel,
         IConfiguration configuration,
         ILogger<DocAssistantChatService> logger,
         IDataBaseSearchService dataBaseSearchService,
         IExampleService exampleService,
-        ICodeInterpreterAgentService codeInterpreterAgentService)
+        ICodeInterpreterAgentService codeInterpreterAgentService,
+        IDataBaseInsertService dataBaseInsertService,
+        IIntentService intentService)
     {
         _configuration = configuration;
         _logger = logger;
         _dataBaseSearchService = dataBaseSearchService;
         _exampleService = exampleService;
         _codeInterpreterAgentService = codeInterpreterAgentService;
+        _dataBaseInsertService = dataBaseInsertService;
+        _intentService = intentService;
 
         _chatService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -76,6 +84,11 @@ public class DocAssistantChatService : IDocAssistantChatService
             // Start the stopwatch for search  
             var searchStopwatch = Stopwatch.StartNew();
 
+            if (overrides.DataBaseSearchConfig.Intent == Intent.Default)
+            {
+                overrides.DataBaseSearchConfig.Intent = await _intentService.CheckIntent(lastQuestion);
+            }
+
             supportingContentList = await GetSupportingContent(lastQuestion, overrides, cancellationToken);
 
             var mergedSupportingContents = GetDocumentContents(supportingContentList);
@@ -99,7 +112,7 @@ public class DocAssistantChatService : IDocAssistantChatService
 
             var answerChatMessageContent = chatMessageContents[0];
 
-            var answer = await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answerChatMessageContent.Content);
+            var answer = await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answerChatMessageContent.Content, overrides.DataBaseSearchConfig.Intent);
 
             var responseMessage = new ResponseMessage("assistant", answer);
             var responseContext = new ResponseContext(
@@ -124,28 +137,47 @@ public class DocAssistantChatService : IDocAssistantChatService
         }
     }
 
-    private async Task<string> PrepareSupportingContentForClient(List<SupportingContentDto> supportingContentList,string lastQuestion, string answer)
+    private async Task<string> PrepareSupportingContentForClient(List<SupportingContentDto> supportingContentList, string lastQuestion, string answer, Intent intent)
     {
-        var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content).ToList();
-
         SupportingContentDto supportingCharts = null;
 
-        foreach (var tableResultPerDb in tableResult)
+        switch(intent)
         {
-            if (tableResultPerDb != null)
+            case Intent.Default:
+            case Intent.Create:
+            case Intent.Query:
             {
-                supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResultPerDb);
-                supportingContentList.Add(supportingCharts);
+                var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content).ToList();
+
+                foreach (var tableResultPerDb in tableResult)
+                {
+                    if (tableResultPerDb == null)
+                    {
+                        continue;
+                    }
+
+                    supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResultPerDb);
+                    supportingContentList.Add(supportingCharts);
+                }
+                break;
             }
+            case Intent.Insert:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(intent), intent, null);
         }
 
+
+
+       
+
         var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples).ToList();
-        foreach(var example in examples)
+        foreach (var example in examples)
         {
             example.Content = _exampleService.TranslateXmlToMarkdown(example.Content);
         }
 
-        if(supportingCharts != null)
+        if (supportingCharts != null)
         {
             var stringBuilder = new StringBuilder(answer);
             stringBuilder.AppendLine("<br />");
@@ -161,9 +193,27 @@ public class DocAssistantChatService : IDocAssistantChatService
     {
         List<SupportingContentDto> supportingContentList = [];
 
-        var supportingContents = await _dataBaseSearchService.Search(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
+        switch (requestOverrides.DataBaseSearchConfig.Intent)
+        {
+            case Intent.Default:
+            case Intent.Query:
+            case Intent.Create:
+            {
+                var supportingContents = await _dataBaseSearchService.Search(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
+                supportingContentList.AddRange(supportingContents);
+                break;
+            }
+            case Intent.Insert:
+            {
+                var supportingContents = await _dataBaseInsertService.Insert(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
+                supportingContentList.AddRange(supportingContents);
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
-        supportingContentList.AddRange(supportingContents);
+
 
         return supportingContentList;
     }

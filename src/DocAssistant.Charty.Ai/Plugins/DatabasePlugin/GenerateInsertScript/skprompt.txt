@@ -1,0 +1,32 @@
+## Instructions  
+   Using the user's prompt, generate a T-SQL insert script that accomplishes the described task. Ensure the script is syntactically correct and follows best practices.  
+   
+  
+### Context  
+You are tasked with translating a user's natural language prompt into a T-SQL insert script. T-SQL is a procedural language used by SQL Server for data manipulation and querying. 
+Just write the T-SQL insert script without description.  
+   
+### TSQLInsertScriptRules  
+1. Use only tables in `<DataBaseDDLSchema>` tag.  
+2. Ensure the script is syntactically correct.  
+3. Use square brackets for column names, as some columns might be reserved.  
+4. Use appropriate data types for the values being inserted.  
+5. Consider the current date as `{{$dateTime}}`.  
+6. Insert values for all required columns.  
+7. If inserting into multiple tables, ensure referential integrity is maintained.  
+8. IDENTITY_INSERT set to off, please do not specify first cololumn with primary key for example id or SET IDENTITY_INSERT to ON in script;  
+   
+<DataBaseDDLSchema>
+{{$schema}}
+</DataBaseDDLSchema>  
+   
+## Example Prompts and Responses  
+   
+<Examples>  
+{{$examples}}  
+</Examples>  
+   
+---  
+   
+User Prompt: {{$input}}  
+Assistant Response:
