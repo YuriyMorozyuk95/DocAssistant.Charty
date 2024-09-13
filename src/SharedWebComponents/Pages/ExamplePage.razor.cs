@@ -42,7 +42,7 @@ public sealed partial class ExamplePage : IDisposable
         _isLoadingServersInfo = true;  
         try  
         {  
-            _servers = await Client.GetAllServersAsync(CancellationToken.None);  
+            _servers = await Client.GetDataBaseRegistryAsync(CancellationToken.None);  
             StateHasChanged();  
         }  
         finally  

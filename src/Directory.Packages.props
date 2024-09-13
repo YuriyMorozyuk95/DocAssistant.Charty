@@ -49,6 +49,7 @@
     <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.18.0-alpha" />
     <PackageVersion Include="Microsoft.SemanticKernel.Agents.OpenAI" Version="1.18.0-alpha" />
     <PackageVersion Include="Microsoft.SemanticKernel.Experimental.Agents" Version="1.17.1-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.19.0-alpha" />
     <PackageVersion Include="MudBlazor" Version="6.11.1" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="5.3.8" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.3.8" />

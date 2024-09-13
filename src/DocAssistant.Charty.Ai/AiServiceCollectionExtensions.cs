@@ -62,9 +62,11 @@ public static class AiServiceCollectionExtensions
                     var openAiClient = sp.GetRequiredService<OpenAIClient>();
 
                     var deployedChtGptModelName = config["AzureOpenAiChatGptDeployment"];
+                    var embeddingModelName = config["KernelMemory:Services:AzureOpenAIEmbedding:Deployment"];
 
                     var kernel = Kernel.CreateBuilder()
                         .AddAzureOpenAIChatCompletion(deployedChtGptModelName, openAiClient)
+                        .AddOpenAITextEmbeddingGeneration(embeddingModelName, openAiClient)
                         .Build();
 
                     var path = Path.Combine(AppContext.BaseDirectory, "Plugins", "DatabasePlugin");
@@ -109,6 +111,8 @@ public static class AiServiceCollectionExtensions
 					return memory;
 				});
 
+        services.AddSingleton<IIntentService, IntentService>();
+
         services.AddScoped<IAzureSqlSchemaGenerator, AzureSqlSchemaGenerator>();
         services.AddScoped<IExampleService, ExampleService>();
 
@@ -121,5 +125,7 @@ public static class AiServiceCollectionExtensions
         services.AddScoped<IDataBaseRegistryService, DataBaseRegistryService>();
 
         services.AddScoped<ICodeInterpreterAgentService, CodeInterpreterAgentService>();
+
+        
     }
 }

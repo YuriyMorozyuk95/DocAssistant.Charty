@@ -146,7 +146,7 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public async Task<List<Server>> GetAllServersAsync(CancellationToken cancellationToken)  
+    public async Task<List<Server>> GetDataBaseRegistryAsync(CancellationToken cancellationToken)  
     {  
         var response = await httpClient.GetAsync("api/get-all-servers", cancellationToken);  
         response.EnsureSuccessStatusCode();  

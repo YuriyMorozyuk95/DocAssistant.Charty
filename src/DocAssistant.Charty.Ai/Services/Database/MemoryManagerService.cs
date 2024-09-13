@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.KernelMemory;
 
 using Shared.Models;
+using System.ComponentModel;
 
 namespace DocAssistant.Charty.Ai.Services.Database;
 

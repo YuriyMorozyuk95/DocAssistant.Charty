@@ -27,6 +27,7 @@
     <PackageReference Include="Microsoft.KernelMemory.Core" />
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="Microsoft.SemanticKernel.Experimental.Agents" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" />
     <PackageReference Include="System.Data.SqlClient" />
   </ItemGroup>
   

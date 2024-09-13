@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 using Xunit;
 using Shared.Models;
 using System.Xml.Serialization;
+using Microsoft.SemanticKernel.Embeddings;
 
 namespace MinimalApi.Tests.Playground  
 {  
@@ -60,4 +61,3 @@ namespace MinimalApi.Tests.Playground
         }  
     }  
 }  
-

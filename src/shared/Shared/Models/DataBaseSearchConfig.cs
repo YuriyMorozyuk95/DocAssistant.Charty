@@ -14,4 +14,6 @@ public class DataBaseSearchConfig
     public List<string> TableFilter { get; set; } = new();
 
     public List<string> DatabaseFilter { get; set; } = new();
+
+    public Intent Intent { get; set; } = new();
 }

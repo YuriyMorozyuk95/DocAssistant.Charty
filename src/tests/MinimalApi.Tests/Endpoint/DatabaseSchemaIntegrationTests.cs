@@ -27,7 +27,7 @@ public class DatabaseSchemaIntegrationTests : IClassFixture<WebApplicationFactor
         var cancellationToken = CancellationToken.None;
 
         // Act  
-        var servers = await _client.GetAllServersAsync(cancellationToken);
+        var servers = await _client.GetDataBaseRegistryAsync(cancellationToken);
 
         // Assert  
         Assert.NotNull(servers);

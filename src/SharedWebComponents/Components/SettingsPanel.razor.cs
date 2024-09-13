@@ -34,19 +34,26 @@ public sealed partial class SettingsPanel : IDisposable
     protected override async Task OnInitializedAsync()  
     {  
         Nav.LocationChanged += HandleLocationChanged;  
-        _servers = await ApiClient.GetAllServersAsync(CancellationToken.None);  
+        _servers = await ApiClient.GetDataBaseRegistryAsync(CancellationToken.None);  
     }  
   
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)  
     {  
         var url = new Uri(e.Location);  
-        var route = url.Segments.LastOrDefault();  
-        _supportedSettings = route switch  
-        {  
-            "ask" => SupportedSettings.Ask,  
-            "chat" => SupportedSettings.Chat,  
-            _ => SupportedSettings.All  
-        };  
+        var route = url.Segments.LastOrDefault();
+        switch (route)
+        {
+            case "ask":
+                _supportedSettings = SupportedSettings.Ask;
+                break;
+            case "chat":
+                _supportedSettings = SupportedSettings.Chat;
+                Task.Run(async () => _servers = await ApiClient.GetDataBaseRegistryAsync(CancellationToken.None));  
+                break;
+            default:
+                _supportedSettings = SupportedSettings.All;
+                break;
+        }
     }  
   
     public void Dispose() => Nav.LocationChanged -= HandleLocationChanged;  
