@@ -39,6 +39,8 @@ public class DocAssistantChatService : IDocAssistantChatService
 
     private readonly IDataBaseInsertService _dataBaseInsertService;
 
+    private readonly IDataBaseCreateTableService _dataBaseCreateTableService;
+
     private readonly IIntentService _intentService;
 
     public DocAssistantChatService(
@@ -49,6 +51,7 @@ public class DocAssistantChatService : IDocAssistantChatService
         IExampleService exampleService,
         ICodeInterpreterAgentService codeInterpreterAgentService,
         IDataBaseInsertService dataBaseInsertService,
+        IDataBaseCreateTableService dataBaseCreateTableService,
         IIntentService intentService)
     {
         _configuration = configuration;
@@ -57,6 +60,7 @@ public class DocAssistantChatService : IDocAssistantChatService
         _exampleService = exampleService;
         _codeInterpreterAgentService = codeInterpreterAgentService;
         _dataBaseInsertService = dataBaseInsertService;
+        _dataBaseCreateTableService = dataBaseCreateTableService;
         _intentService = intentService;
 
         _chatService = kernel.GetRequiredService<IChatCompletionService>();
@@ -100,19 +104,33 @@ public class DocAssistantChatService : IDocAssistantChatService
             var chatHistory = await ChatTurnToChatHistory(history, mergedSupportingContents, cancellationToken);
 
             var chatServiceStopwatch = Stopwatch.StartNew();
-            var chatMessageContents = await _chatService.GetChatMessageContentsAsync(chatHistory, null, cancellationToken: cancellationToken);
-            completionTime = TimeSpan.FromMilliseconds(chatServiceStopwatch.ElapsedMilliseconds);
 
-            _logger.LogInformation($"Completion time: {completionTime}");
-
-            if (chatMessageContents.Count == 0)
+            string answer = null;
+            if (overrides.DataBaseSearchConfig.Intent is Intent.Query or Intent.Default)
             {
-                throw new Exception("Ai model not respond");
+                var chatMessageContents = await _chatService.GetChatMessageContentsAsync(chatHistory, cancellationToken: cancellationToken);
+
+                completionTime = TimeSpan.FromMilliseconds(chatServiceStopwatch.ElapsedMilliseconds);
+
+                _logger.LogInformation($"Completion time: {completionTime}");
+
+                if (chatMessageContents.Count == 0)
+                {
+                    throw new Exception("Ai model not respond");
+                }
+
+                answer = chatMessageContents[0].Content;
+            }
+            else
+            {
+                 var sqlResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult)
+                    .Select(x => x.Content);
+
+                answer = string.Join("/n", sqlResult);
             }
 
-            var answerChatMessageContent = chatMessageContents[0];
 
-            var answer = await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answerChatMessageContent.Content, overrides.DataBaseSearchConfig.Intent);
+            answer = await PrepareSupportingContentForClient(supportingContentList, lastQuestion, answer, overrides.DataBaseSearchConfig.Intent);
 
             var responseMessage = new ResponseMessage("assistant", answer);
             var responseContext = new ResponseContext(
@@ -144,7 +162,6 @@ public class DocAssistantChatService : IDocAssistantChatService
         switch(intent)
         {
             case Intent.Default:
-            case Intent.Create:
             case Intent.Query:
             {
                 var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content).ToList();
@@ -161,15 +178,12 @@ public class DocAssistantChatService : IDocAssistantChatService
                 }
                 break;
             }
+            case Intent.Create:
             case Intent.Insert:
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(intent), intent, null);
         }
-
-
-
-       
 
         var examples = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.Examples).ToList();
         foreach (var example in examples)
@@ -197,9 +211,14 @@ public class DocAssistantChatService : IDocAssistantChatService
         {
             case Intent.Default:
             case Intent.Query:
-            case Intent.Create:
             {
                 var supportingContents = await _dataBaseSearchService.Search(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
+                supportingContentList.AddRange(supportingContents);
+                break;
+            }
+            case Intent.Create:
+            {
+                var supportingContents = await _dataBaseCreateTableService.CreateTable(lastQuestion, requestOverrides.DataBaseSearchConfig, cancellationToken);
                 supportingContentList.AddRange(supportingContents);
                 break;
             }
@@ -212,8 +231,6 @@ public class DocAssistantChatService : IDocAssistantChatService
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-
 
         return supportingContentList;
     }

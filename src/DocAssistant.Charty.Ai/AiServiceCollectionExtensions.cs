@@ -119,8 +119,10 @@ public static class AiServiceCollectionExtensions
         services.AddScoped<IDocumentStorageService, DocumentStorageService>();
         services.AddScoped<IMemoryManagerService, MemoryManagerService>();
         services.AddScoped<IMemorySearchService, MemorySearchService>();
+
         services.AddScoped<IDataBaseSearchService, DataBaseSearchService>();
         services.AddScoped<IDataBaseInsertService, DataBaseInsertService>();
+        services.AddScoped<IDataBaseCreateTableService, DataBaseCreateTableService>();
 
         services.AddScoped<ISqlExecutorService, SqlExecutorService>();
         services.AddScoped<IDocAssistantChatService, DocAssistantChatService>();

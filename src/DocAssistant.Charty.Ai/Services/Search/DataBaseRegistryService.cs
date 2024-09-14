@@ -11,9 +11,9 @@ namespace DocAssistant.Charty.Ai.Services.Search
     {
         Task<List<Server>> GetAllServers();
         Task<Server> AddNewServer(List<TableSchema> tables);
-        //Task AddTableForServer(string serverName, string databaseName, string tableName);
         Task CleanUpContainer();
         Task<string?> GetConnectionStringByDatabaseName(string databaseName);
+        Task<Shared.Models.Database> AddTableForServer(string serverName, string databaseName, string tableName);
     }
 
     public class DataBaseRegistryService : IDataBaseRegistryService
@@ -150,6 +150,38 @@ namespace DocAssistant.Charty.Ai.Services.Search
             var createdServer = await _container.CreateItemAsync(newServer, new PartitionKey(newServer.ServerName));
             return createdServer.Resource;
         }
+
+        public async Task<Shared.Models.Database> AddTableForServer(string serverName, string databaseName, string tableName)  
+        {
+            Shared.Models.Database existingDatabase = null;
+
+            await Initialize();  
+            // Query to find the server by name  
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.serverName = @serverName")  
+                .WithParameter("@serverName", serverName);  
+            var iterator = _container.GetItemQueryIterator<Server>(query);  
+            var existingServer = (await iterator.ReadNextAsync()).FirstOrDefault();
+
+            if (existingServer != null)  
+            {  
+                // Server exists, check if the database exists  
+                existingDatabase = existingServer.Databases  
+                    .FirstOrDefault(db => db.DatabaseName == databaseName);
+
+                if (existingDatabase != null)  
+                {  
+                    // Database exists, update tables  
+                    if (!existingDatabase.Tables.Contains(tableName))  
+                    {  
+                        existingDatabase.Tables = existingDatabase.Tables.Append(tableName);  
+                        // Update the server in the container  
+                       var updatedServer = await _container.ReplaceItemAsync(existingServer, existingServer.Id.ToString(), new PartitionKey(existingServer.ServerName));  
+                    }  
+                }
+            }
+
+            return existingDatabase;
+        }  
 
 
         public async Task CleanUpContainer()

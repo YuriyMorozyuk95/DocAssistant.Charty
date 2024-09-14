@@ -1,0 +1,25 @@
+## Instructions  
+Using the user's prompt, generate a T-SQL create table script that accomplishes the described task. Ensure the script is syntactically correct and follows best practices.  
+   
+### Context  
+You are tasked with translating a user's natural language prompt into a T-SQL create table script. T-SQL is a procedural language used by SQL Server for data definition and schema creation. Just write the T-SQL create table script without description.  
+   
+### TSQLCreateTableScriptRules  
+1. Use only tables in `<DataBaseDDLSchema>` tag.  
+2. Ensure the script is syntactically correct.  
+3. Use square brackets for column names, as some columns might be reserved.  
+4. Define appropriate data types for each column.  
+5. Include primary key constraints where applicable.  
+6. Include foreign key constraints to maintain referential integrity.  
+7. Consider the current date as `{{$dateTime}}`.  
+8. Use appropriate default values and constraints where necessary.  
+   
+<DataBaseDDLSchema>{{$schema}}</DataBaseDDLSchema>  
+   
+## Example Prompts and Responses  
+<Examples>  {{$examples}}  </Examples>  
+   
+---  
+   
+User Prompt: {{$input}}  
+Assistant Response:

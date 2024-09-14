@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Plugins\DatabasePlugin\GenerateCreateTableScript\config.json" />
+    <None Remove="Plugins\DatabasePlugin\GenerateCreateTableScript\skprompt.txt" />
     <None Remove="Plugins\DatabasePlugin\GenerateSql\config.json" />
     <None Remove="Plugins\DatabasePlugin\GenerateSql\skprompt.txt" />
     <None Remove="Plugins\DatabasePlugin\GenerateInsertScript\config.json" />
@@ -14,6 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Plugins\DatabasePlugin\GenerateCreateTableScript\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Plugins\DatabasePlugin\GenerateCreateTableScript\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Plugins\DatabasePlugin\GenerateSql\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

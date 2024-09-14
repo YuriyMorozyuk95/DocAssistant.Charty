@@ -9,6 +9,7 @@ public interface ISqlExecutorService
     Task<string> GetMarkdownTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default);
     Task<string> GetHtmlTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default);
     Task<string> ExecuteInsertScript(string connectionString, string insertScript, CancellationToken cancellationToken = default);
+    Task<string> ExecuteCreateTableScript(string connectionString, string createTableScript, CancellationToken cancellationToken = default);
 }
 
 public class SqlExecutorService : ISqlExecutorService
@@ -106,6 +107,23 @@ public class SqlExecutorService : ISqlExecutorService
             await using var command = new SqlCommand(insertScript, connection);  
             var rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);  
             return $"Insert script executed successfully. Rows affected: {rowsAffected}";  
+        }  
+        catch (Exception ex)  
+        {  
+            return ex.Message;  
+        }  
+    }
+
+    public async Task<string> ExecuteCreateTableScript(string connectionString, string createTableScript, CancellationToken cancellationToken = default)  
+    {  
+        try  
+        {  
+            await using var connection = new SqlConnection(connectionString);  
+            await connection.OpenAsync(cancellationToken);  
+  
+            await using var command = new SqlCommand(createTableScript, connection);  
+            await command.ExecuteNonQueryAsync(cancellationToken);  
+            return "Create table script executed successfully.";  
         }  
         catch (Exception ex)  
         {  
