@@ -109,7 +109,8 @@ namespace DocAssistant.Charty.Ai.Services.CodeInterpreter
   
         private string GenerateChartDescription(string userPrompt, string data)  
         {  
-            StringBuilder sb = new();  
+            StringBuilder sb = new();
+            sb.AppendLine("Please generate on of the charts from <TypeOfCharts> tag"); 
             sb.AppendLine("<TypeOfCharts>");  
             sb.AppendLine("    • Line Chart: Shows trends over time.");  
             sb.AppendLine("    • Bar Chart: Compares quantities across categories.");  

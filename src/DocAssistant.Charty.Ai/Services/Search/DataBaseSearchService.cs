@@ -134,15 +134,9 @@ public class DataBaseSearchService : IDataBaseSearchService
         });  
     }  
   
-    private void AddTableResultContent(List<SupportingContentDto> supportingContent, string tableResult)  
+    private void AddTableResultContent(List<SupportingContentDto> supportingContent, SupportingContentDto tableResult)  
     {  
-        supportingContent.Add(new SupportingContentDto  
-        {  
-            Title = "Table Result",  
-            Content = tableResult,  
-            IsDebug = true,  
-            SupportingContentType = SupportingContentType.TableResult,  
-        });  
+        supportingContent.Add(tableResult);  
     }
 
 

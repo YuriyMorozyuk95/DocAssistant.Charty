@@ -99,8 +99,17 @@ public class DataBaseInsertService : IDataBaseInsertService
   
         foreach (var schema in schemas)  
         {  
-            AddSchemaContent(supportingContent, schema);  
-            await _sqlExecutorService.ExecuteInsertScript(schema.Key, config.Query, cancellationToken);  
+            AddSchemaContent(supportingContent, schema);
+
+            var result = await _sqlExecutorService.ExecuteInsertScript(schema.Key, config.Query, cancellationToken);
+
+            supportingContent.Add(new SupportingContentDto  
+                                  {  
+                                      Title = "Insert Result",  
+                                      Content = result,  
+                                      IsDebug = true,  
+                                      SupportingContentType = SupportingContentType.TableResult,  
+                                  });
         }  
     }  
 

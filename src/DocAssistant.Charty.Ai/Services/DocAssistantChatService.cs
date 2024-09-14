@@ -123,8 +123,8 @@ public class DocAssistantChatService : IDocAssistantChatService
             }
             else
             {
-                 var sqlResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult)
-                    .Select(x => x.Content);
+                var sqlResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult)
+                   .Select(x => x.Content);
 
                 answer = string.Join("/n", sqlResult);
             }
@@ -159,22 +159,29 @@ public class DocAssistantChatService : IDocAssistantChatService
     {
         SupportingContentDto supportingCharts = null;
 
-        switch(intent)
+        switch (intent)
         {
             case Intent.Default:
             case Intent.Query:
             {
-                var tableResult = supportingContentList.Where(x => x.SupportingContentType == SupportingContentType.TableResult).Select(x => x?.Content).ToList();
+                var tableResult = supportingContentList.Where(x => x is { SupportingContentType: SupportingContentType.TableResult, IsSuccessful: true }).Select(x => x?.Content).ToList();
 
                 foreach (var tableResultPerDb in tableResult)
                 {
-                    if (tableResultPerDb == null)
+                    try
+                    {
+                        if (tableResultPerDb == null)
+                        {
+                            continue;
+                        }
+
+                        supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResultPerDb);
+                        supportingContentList.Add(supportingCharts);
+                    }
+                    catch (Exception)
                     {
                         continue;
                     }
-
-                    supportingCharts = await _codeInterpreterAgentService.GenerateChart(lastQuestion, tableResultPerDb);
-                    supportingContentList.Add(supportingCharts);
                 }
                 break;
             }

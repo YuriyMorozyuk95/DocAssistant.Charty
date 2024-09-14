@@ -27,4 +27,5 @@ public class SupportingContentDto
 
     public SupportingContentType SupportingContentType { get; set; }
 
+    public bool IsSuccessful { get; set; }
 }

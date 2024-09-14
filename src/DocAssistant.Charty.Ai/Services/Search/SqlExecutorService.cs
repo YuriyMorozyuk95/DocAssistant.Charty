@@ -2,12 +2,14 @@
 
 using Microsoft.Data.SqlClient;
 
+using Shared.Models;
+
 namespace DocAssistant.Charty.Ai.Services.Search;
 
 public interface ISqlExecutorService
 {
     Task<string> GetMarkdownTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default);
-    Task<string> GetHtmlTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default);
+    Task<SupportingContentDto> GetHtmlTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default);
     Task<string> ExecuteInsertScript(string connectionString, string insertScript, CancellationToken cancellationToken = default);
     Task<string> ExecuteCreateTableScript(string connectionString, string createTableScript, CancellationToken cancellationToken = default);
 }
@@ -49,7 +51,7 @@ public class SqlExecutorService : ISqlExecutorService
         return markdownTable.ToString();
     }
 
-    public async Task<string> GetHtmlTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default)  
+    public async Task<SupportingContentDto> GetHtmlTable(string connectionString, string sqlQuery, int count, CancellationToken cancellationToken = default)  
     {  
         var htmlTable = new StringBuilder();  
         var rowCount = 0;  
@@ -90,11 +92,25 @@ public class SqlExecutorService : ISqlExecutorService
             htmlTable.AppendLine("</table>");  
         }  
         catch (Exception ex)  
-        {  
-            return ex.Message;  
+        {
+            return new SupportingContentDto  
+            {  
+                Title = "Table Result",  
+                Content = ex.Message,  
+                IsDebug = true,  
+                SupportingContentType = SupportingContentType.TableResult,
+                IsSuccessful = true,
+            };
         }  
   
-        return htmlTable.ToString();  
+        return new SupportingContentDto  
+                      {  
+                          Title = "Table Result",  
+                          Content = htmlTable.ToString(),  
+                          IsDebug = true,  
+                          SupportingContentType = SupportingContentType.TableResult,
+                          IsSuccessful = true,
+                      };
     }
 
     public async Task<string> ExecuteInsertScript(string connectionString, string insertScript, CancellationToken cancellationToken = default)  
