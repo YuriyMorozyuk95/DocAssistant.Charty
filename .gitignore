@@ -360,3 +360,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/backend/Properties/ServiceDependencies/DocAssistantDeploy/profile.arm.json
