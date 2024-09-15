@@ -184,30 +184,27 @@ public class DataBaseSearchService : IDataBaseSearchService
     {
         var schemasPerDatabase = new Dictionary<string, string>();
         var tableSchemas = await _memorySearchService.SearchDataBaseSchema(userPrompt, dataBaseSearchConfig, cancellationToken).ToListAsync(cancellationToken: cancellationToken);
-        var schemaPerConnectionString = tableSchemas.GroupBy(x => x.ConnectionString);
+        var schemaPerConnectionString = tableSchemas.GroupBy(x => x.ConnectionString).FirstOrDefault();
 
-        foreach (var tableInConnectionString in schemaPerConnectionString)
+        var firstItem = schemaPerConnectionString.FirstOrDefault();
+        StringBuilder builder = new StringBuilder();
+
+        // Append server and database information in Markdown  
+        builder.AppendLine($"## Server: {firstItem.ServerName}");
+        builder.AppendLine($"### Database: {firstItem.DatabaseName}");
+        builder.AppendLine();
+
+        foreach (var table in schemaPerConnectionString)
         {
-            var firstItem = tableInConnectionString.First();
-            StringBuilder builder = new StringBuilder();
-
-            // Append server and database information in Markdown  
-            builder.AppendLine($"## Server: {firstItem.ServerName}");
-            builder.AppendLine($"### Database: {firstItem.DatabaseName}");
-            builder.AppendLine();
-
-            foreach (var table in tableInConnectionString)
-            {
-                // Append table name and schema in Markdown  
-                builder.AppendLine($"#### Table: {table.TableName}");
-                builder.AppendLine("```sql");
-                builder.AppendLine(table.Schema);
-                builder.AppendLine("```");
-                builder.AppendLine(); // Add a blank line for better readability  
-            }
-
-            schemasPerDatabase.Add(firstItem.ConnectionString, builder.ToString());
+            // Append table name and schema in Markdown  
+            builder.AppendLine($"#### Table: {table.TableName}");
+            builder.AppendLine("```sql");
+            builder.AppendLine(table.Schema);
+            builder.AppendLine("```");
+            builder.AppendLine(); // Add a blank line for better readability  
         }
+
+        schemasPerDatabase.Add(firstItem.ConnectionString, builder.ToString());
 
         return schemasPerDatabase;
     }

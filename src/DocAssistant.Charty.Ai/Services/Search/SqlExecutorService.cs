@@ -99,7 +99,7 @@ public class SqlExecutorService : ISqlExecutorService
                 Content = ex.Message,  
                 IsDebug = true,  
                 SupportingContentType = SupportingContentType.TableResult,
-                IsSuccessful = true,
+                IsSuccessful = false,
             };
         }  
   
