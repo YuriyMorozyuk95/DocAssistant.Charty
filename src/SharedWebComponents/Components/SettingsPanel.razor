@@ -42,6 +42,20 @@
                         }
                     }
                 </MudSelect>
+
+                <!-- Instruction text for Intent selection -->
+                <MudText Typo="Typo.body1" Class="mt-4">
+                    Please select default if you want AI to check intent.
+                </MudText>
+
+                <!-- New MudSelect for Intent -->
+                <MudSelect @bind-Value="Settings.Overrides.DataBaseSearchConfig.Intent" Label="Select Intent" Variant="Variant.Outlined" T="Intent">
+                    @foreach (Intent intent in Enum.GetValues(typeof(Intent)))
+                    {
+                        <MudSelectItem Value="@intent">@intent</MudSelectItem>
+                    }
+                </MudSelect>
+
             </MudForm>
         </MudExpansionPanel>
         <MudDivider DividerType="DividerType.Middle" Class="my-6" />
