@@ -50,14 +50,19 @@ DocAssistant.Charty is an advanced AI-powered data management and analytics tool
    
 - **Database Upload:** Connect and upload databases by copying the connection string, extracting DDL schemas, and storing them in a vector database index.  
 - **AI Training:** Use an 'Example' page to create and upload prompt examples, improving the accuracy of AI-generated SQL queries.  
-- **Answer Generation:** Retrieve relevant schemas and examples, translate prompts to SQL queries, execute the queries, and generate visualizations using a code interpreter.  
-   
+- **Answer Generation:** Retrieve relevant schemas and examples, translate prompts to SQL queries, execute the queries, and generate visualizations using a code interpreter.
+
+**Workflow diagram:**  
+ ![ChartyWorkflow](https://github.com/user-attachments/assets/d815b422-c583-47f8-9f2d-96d269460d04)
+
+ 
 **Conclusion:**  
    
 DocAssistant.Charty is a powerful, adaptable tool designed to help users harness the power of their data. Whether you are a business owner looking to gain insights into your operations or an individual seeking to analyze your financial data, DocAssistant.Charty provides the tools you need to make informed, data-driven decisions.  
 
 ## Project Team:  
-   
+  
+
 Yurii Moroziuk – Project Lead /.Net AI Developer   
 E-mail: Yurii.Moroziuk@hotmail.com  
 Credly: https://www.credly.com/users/yurii-moroziuk/badges  
