@@ -2,10 +2,13 @@
 
 using System.Net;
 
+using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Search.Documents.Indexes;
+using Azure.Storage;
 
+using Microsoft.Extensions.DependencyInjection;
 namespace MinimalApi.Extensions;
 
 internal static class ServiceCollectionExtensions
@@ -24,11 +27,12 @@ internal static class ServiceCollectionExtensions
                     var config = sp.GetRequiredService<IConfiguration>();
                     string accountName = config["KernelMemory:Services:AzureBlobs:Account"];
                     string endpointSuffix = config["KernelMemory:Services:AzureBlobs:EndpointSuffix"];
+                    string key = config["KernelMemory:Services:AzureBlobs:AccountKey"];
 
-                    string blobEndpoint = $"https://{accountName}.blob.{endpointSuffix}";
+                    string blobServiceEndpoint = $"https://{accountName}.blob.core.windows.net";  
+                    string storageConnectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={key};EndpointSuffix=core.windows.net";
 
-                    // Create a BlobServiceClient that will authenticate through Active Directory  
-                    var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint), sp.GetRequiredService<TokenCredential>());
+                    var blobServiceClient = new BlobServiceClient(storageConnectionString);
                     return blobServiceClient;
                 });
 
@@ -69,34 +73,34 @@ internal static class ServiceCollectionExtensions
                     return searchIndexClient;
                 });
 
-        services.AddSingleton(
-            sp =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-                    var documentIntelligenceEndpoint = config["AzureDocumentIntelligenceEndpoint"];
+        //services.AddSingleton(
+        //    sp =>
+        //        {
+        //            var config = sp.GetRequiredService<IConfiguration>();
+        //            var documentIntelligenceEndpoint = config["AzureDocumentIntelligenceEndpoint"];
 
-                    ArgumentNullException.ThrowIfNullOrEmpty(documentIntelligenceEndpoint);
+        //            ArgumentNullException.ThrowIfNullOrEmpty(documentIntelligenceEndpoint);
 
-                    var credential = sp.GetRequiredService<TokenCredential>();
+        //            var credential = sp.GetRequiredService<TokenCredential>();
 
-                    var documentAnalysisClient = new DocumentAnalysisClient(
-                        new Uri(documentIntelligenceEndpoint),
-                        credential,
-                        new DocumentAnalysisClientOptions
-                        {
-                            Transport = new HttpClientTransport(
-                                new HttpClient(
-                                    new HttpClientHandler()
-                                    {
-                                        Proxy = new WebProxy()
-                                        {
-                                            BypassProxyOnLocal = false,
-                                            UseDefaultCredentials = true,
-                                        }
-                                    }))
-                        });
-                    return documentAnalysisClient;
-                });
+        //            var documentAnalysisClient = new DocumentAnalysisClient(
+        //                new Uri(documentIntelligenceEndpoint),
+        //                credential,
+        //                new DocumentAnalysisClientOptions
+        //                {
+        //                    Transport = new HttpClientTransport(
+        //                        new HttpClient(
+        //                            new HttpClientHandler()
+        //                            {
+        //                                Proxy = new WebProxy()
+        //                                {
+        //                                    BypassProxyOnLocal = false,
+        //                                    UseDefaultCredentials = true,
+        //                                }
+        //                            }))
+        //                });
+        //            return documentAnalysisClient;
+        //        });
 
 
         return services;

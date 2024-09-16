@@ -15,5 +15,5 @@ public class DataBaseSearchConfig
 
     public List<string> DatabaseFilter { get; set; } = new();
 
-    public Intent Intent { get; set; } = new();
+    public Intent Intent { get; set; } = Intent.Query;
 }

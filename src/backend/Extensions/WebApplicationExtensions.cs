@@ -60,6 +60,7 @@ internal static class WebApplicationExtensions
         foreach (var table in tables)
         {
             yield return $"Uploading Table: {table.TableName}";
+
             var uploadedTable = await memoryManagerService.UploadTableSchemaToMemory(table, cancellationToken);
 
             if (uploadedTable.DocumentId != null)

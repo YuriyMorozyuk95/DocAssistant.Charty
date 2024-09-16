@@ -34,7 +34,8 @@ namespace MinimalApi.Tests.Playground
         [Fact]
         public async Task GenerateAndUploadAzureSqlSchemaToMemory()
         {
-            var connectionString = "Server=tcp:hack-rag-sql-server.database.windows.net,1433;Initial Catalog=test-database;Persist Security Info=False;User ID=database-admin;Password=DocAssistant.Charty;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            //var connectionString = "Server=tcp:hack-rag-sql-server.database.windows.net,1433;Initial Catalog=test-database;Persist Security Info=False;User ID=database-admin;Password=DocAssistant.Charty;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            var connectionString = "Server=tcp:test-sql-rag-sql-server.database.windows.net,1433;Initial Catalog=TopCutBarbershopDb-2024-9-16-11-31;Persist Security Info=False;User ID=database-admin;Password=DocAssistant.Charty;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
             var tables = _azureSqlSchemaGenerator.GetTableNamesDdlSchemas(connectionString);
 

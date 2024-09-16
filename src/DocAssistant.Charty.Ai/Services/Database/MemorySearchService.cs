@@ -29,25 +29,24 @@ public class MemorySearchService : IMemorySearchService
 
     private readonly ILogger<MemorySearchService> _logger;
 
-    private readonly TokenCredential _tokenCredential;
-
     private readonly MemoryServerless _memory;
 
     private readonly string? _azureAiSearchEndpoint;
+
+    private readonly string? _apiKey;
 
     public MemorySearchService(
         MemoryServerless memory,
         IDocumentStorageService documentStorageService,
         ILogger<MemorySearchService> logger,
-        TokenCredential tokenCredential,
         IConfiguration configuration)
     {
         _memory = memory;
         _documentStorageService = documentStorageService;
         _logger = logger;
-        _tokenCredential = tokenCredential;
 
         _azureAiSearchEndpoint = configuration["KernelMemory:Services:AzureAISearch:Endpoint"];
+        _apiKey = configuration["KernelMemory:Services:AzureAISearch:APIKey"];
     }
 
     public async IAsyncEnumerable<TableSchema> SearchDataBaseSchema(string userPrompt, DataBaseSearchConfig dataBaseSearchConfig, CancellationToken cancellationToken = default)
@@ -199,7 +198,7 @@ public class MemorySearchService : IMemorySearchService
         var searchClient = new SearchClient(
             new Uri(_azureAiSearchEndpoint),
             MemoryManagerService.DataBaseSchemaIndex,
-            _tokenCredential);
+            new AzureKeyCredential(_apiKey));
 
         // Define the search options  
         var options = new SearchOptions
@@ -280,7 +279,7 @@ public class MemorySearchService : IMemorySearchService
         var searchClient = new SearchClient(
             new Uri(_azureAiSearchEndpoint),
             MemoryManagerService.ExamplesIndex,
-            _tokenCredential);
+            new AzureKeyCredential(_apiKey));
 
         var options = new SearchOptions
         {
