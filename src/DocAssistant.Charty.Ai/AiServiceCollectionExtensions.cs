@@ -28,10 +28,10 @@ public static class AiServiceCollectionExtensions
 				{
 					var config = sp.GetRequiredService<IConfiguration>();
 					var azureOpenAiServiceEndpoint = config["KernelMemory:Services:AzureOpenAIText:Endpoint"];
+                    var apiKey = config["KernelMemory:Services:AzureOpenAIText:APIKey"];
 
 					ArgumentException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint);
 
-					var credential = sp.GetRequiredService<TokenCredential>();
 
 					//var openAiClient = new OpenAIClient(
 					//	,
@@ -50,7 +50,7 @@ public static class AiServiceCollectionExtensions
 					//				}))
 					//	});
 
-                    var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), credential);
+                    var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new Azure.AzureKeyCredential(apiKey));
 
 					return openAiClient;
 				});
